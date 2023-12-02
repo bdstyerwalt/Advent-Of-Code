@@ -9,8 +9,18 @@ use std::{fs, error::Error};
 use regex::Regex;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let input_file = fs::read_to_string("input.txt")?;
+    let input_file: String = fs::read_to_string("input.txt")?;
     
+    let p1_val = part1(&input_file);
+    println!("\n\n--------------");
+    println!("Part 1: {}", &p1_val);
+    println!("--------------");
+    
+    return Ok(())
+}
+
+
+fn part1(input_file: &String) -> i32{
     let re = Regex::new(r"(\D*)(?<first>\d)(\w*\d*)(?<last>\d)(\w*)").unwrap();
     let single_num = Regex::new(r"(\D*)(?<first>\d)").unwrap();
 
@@ -30,11 +40,11 @@ fn main() -> Result<(), Box<dyn Error>> {
             todo!()
         }
         acc += 10*first + last;
-        print!("{:?}", first);
-        print!("{:?} ", last);
-        println!("{}\n---", acc);
+        //print!("{:?}", first);
+        //print!("{:?} ", last);
+        //println!("{}\n---", acc);
     }
+    return acc;
     
-    println!("\n\n------\n{}\n-----", acc);
-    return Ok(())
+    
 }
