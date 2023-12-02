@@ -40,9 +40,7 @@ fn part1(input_file: &String) -> i32 {
             todo!()
         }
         acc += 10*first + last;
-        //print!("{:?}", first);
-        //print!("{:?} ", last);
-        //println!("{}\n---", acc);
+        //println!("{}{} {}\n--- ", first, last, acc);
     }
     return acc;
     
@@ -82,7 +80,7 @@ fn part2(input_file: &String) -> i32 {
             }
         }
         acc += 10*first_digit + last_digit;
-        println!("{}{}: {}", first_digit, last_digit, acc);
+        //println!("{}{}: {}", first_digit, last_digit, acc);
     }
     return acc;
 }
