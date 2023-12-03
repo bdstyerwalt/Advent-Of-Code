@@ -5,7 +5,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     println!("\n\n---------Day 3---------");
     println!("Part 1: {}", &part1(&input_file));
-    //println!("Part 2: {}", &part2(&input_file));
+    println!("Part 2: {}", &part2(&input_file));
     println!("----------------------");
     
     return Ok(())
@@ -87,4 +87,52 @@ fn find_numbers(input_file: &String) -> Vec<(i32, i32, i32, i32)> {
 
 }
 
-//fn part2(input_file: &String) {  }
+/* ---------------------------------------------------------------- */
+
+fn part2(input_file: &String) -> i32 { 
+    println!("-----------------");
+    let gear_locs: HashSet<(i32, i32)> = find_gears(input_file);
+    let number_locs: Vec<(i32, i32, i32, i32)> = find_numbers(input_file);
+
+    let mut acc: i32 = 0;
+    for (gear_row, gear_col) in gear_locs {
+        let mut touching: i32 = 0;
+        let mut gear_ratio: i32 = 1;
+        for (val, row, left, right) in &number_locs {
+            let mut border_points: HashSet<(i32, i32)> = HashSet::new();
+            let (row, left, right) = (*row as i32, *left as i32, *right as i32);
+            //println!("----------\n{}: {}, ({},{})", val, row, left, right);
+            for y in row-1..=row+1 {
+                for x in left-1..=right+1 {
+                    //println!("{},{}", y, x);
+                    border_points.insert((y, x));
+                }
+            }
+        
+            if border_points.contains(&(gear_row, gear_col)) {
+                println!("* at ({},{}) touches {}", gear_row, gear_col, val);
+                touching += 1;
+                gear_ratio *= val;
+            }
+            if touching == 2 {
+                println!("Gear ratio is -> {}", gear_ratio);
+                acc += gear_ratio;
+                break;
+            }
+        }
+    }
+    return acc;
+}
+
+fn find_gears(input_file: &String) -> HashSet<(i32, i32)> {
+    let mut gear_locs: HashSet<(i32, i32)> = HashSet::new();
+    for (row, line) in input_file.lines().enumerate() {
+        for (col, c) in line.chars().enumerate() {
+            if c == '*' {
+                //println!("{} {},{}", &c.to_string(), row, col);
+                gear_locs.insert((row as i32, col as i32));
+            }
+        }
+    }
+    return gear_locs;
+}
