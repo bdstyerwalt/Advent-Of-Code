@@ -1,13 +1,13 @@
-use std::{fs, error::Error, collections::HashMap};
+use std::{fs, error::Error, collections::HashMap, str::Lines};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let input_file: String = fs::read_to_string("input.txt")?;
 
-    let p1_res: i64 = part1(&input_file);
-
     println!("\n\n---------Day 5---------");
+    let p1_res: i64 = part1(&input_file);
     println!("Part 1: {}", p1_res);
-    //println!("Part 2: {}", part2(game_cards));
+    let p2_res: i64 = part2(&input_file);
+    println!("Part 2: {}", p2_res);
     println!("-----------------------");
     
     return Ok(())
@@ -19,40 +19,48 @@ fn part1(input_lines: &String) -> i64 {
     // Find Seeds
     let mut seeds = lines.next().unwrap();
     seeds = seeds.split(": ").nth(1).unwrap();
-    let mut seeds: Vec<i64> = seeds.split_whitespace().map(|x| x.trim().parse().unwrap()).collect();
+    let seeds: Vec<i64> = seeds.split_whitespace().map(|x| x.trim().parse().unwrap()).collect();
     
     let mut seed_map: HashMap<i64, i64> = HashMap::new();
     for seed in &seeds {
         seed_map.insert(*seed, *seed);
     }
     
-    let mut building: bool = false;
-    let mut tmp_map: HashMap<(i64, i64), (i64, i64)> = HashMap::new();
-    for line in lines {
-        if line.contains("map:") {
-            println!("\n------\n{}", line);
-            building = true;
-            continue;
-        }
+    return process(lines, seed_map);
+}
 
-        if building && line.is_empty() {
-            building = false;
-        }
-        
-        if building {
-            let mut map_input: Vec<i64> = line.split_whitespace().map(|x| x.parse().unwrap()).collect();
-            let m2 = build_map(&mut map_input);
-            tmp_map.extend(m2)
-        }
-        
-        if !building && !tmp_map.is_empty() {
-            seed_map = compare_maps(seed_map, tmp_map.clone());
-            tmp_map.clear();
+fn part2(input_lines: &String) -> i64 {
+    let mut lines = input_lines.lines();
+
+    // Find Seeds
+    let mut seeds = lines.next().unwrap();
+    seeds = seeds.split(": ").nth(1).unwrap();
+    let seeds: Vec<i64> = seeds.split_whitespace().map(|x| x.trim().parse().unwrap()).collect();
+    println!("seeds {:?}", seeds);
+    let starters: Vec<i64> = seeds.clone().into_iter()
+                        .step_by(2)
+                        .collect();
+    let ranges: Vec<i64> = seeds.into_iter()
+                        .skip(1)
+                        .step_by(2)
+                        .collect();
+
+    println!("starts {:?}", starters);
+    println!("ranges {:?}", ranges);
+    
+
+    let mut seed_map: HashMap<i64, i64> = HashMap::new();
+    for i in 0..starters.len() {
+        let start = starters[i];
+        println!("{} -> {:?}", start, ranges[i]);
+        for r in 0..ranges[i] {
+            seed_map.insert(start+r, start+r);
         }
     }
-    seed_map = compare_maps(seed_map, tmp_map.clone());
-    return *seed_map.values().min().unwrap();
+    
+    return process(lines, seed_map);
 }
+
 
 fn build_map(nums: &mut Vec<i64>) -> HashMap<(i64, i64), (i64, i64)> {
     //print!("--Building!");
@@ -92,3 +100,32 @@ fn compare_maps(source_map: HashMap<i64, i64>, dest_map: HashMap<(i64, i64), (i6
     return map;
 }
 
+fn process(lines: Lines, seed_map: HashMap<i64, i64>) -> i64 {
+    let mut seed_map: HashMap<i64, i64> = seed_map;
+    let mut building: bool = false;
+    let mut tmp_map: HashMap<(i64, i64), (i64, i64)> = HashMap::new();
+    for line in lines {
+        if line.contains("map:") {
+            println!("{}", line);
+            building = true;
+            continue;
+        }
+
+        if building && line.is_empty() {
+            building = false;
+        }
+        
+        if building {
+            let mut map_input: Vec<i64> = line.split_whitespace().map(|x| x.parse().unwrap()).collect();
+            let m2 = build_map(&mut map_input);
+            tmp_map.extend(m2)
+        }
+        
+        if !building && !tmp_map.is_empty() {
+            seed_map = compare_maps(seed_map, tmp_map.clone());
+            tmp_map.clear();
+        }
+    }
+    seed_map = compare_maps(seed_map, tmp_map.clone());
+    return *seed_map.values().min().unwrap();
+}
