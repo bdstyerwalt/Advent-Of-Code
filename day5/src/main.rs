@@ -1,27 +1,27 @@
 use std::{fs, error::Error, collections::HashMap, str::Lines};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let input_file: String = fs::read_to_string("input.txt")?;
+    let input_file: String = fs::read_to_string("sample.txt")?;
 
     println!("\n\n---------Day 5---------");
-    let p1_res: i64 = part1(&input_file);
+    let p1_res: i128 = part1(&input_file);
     println!("Part 1: {}", p1_res);
-    let p2_res: i64 = part2(&input_file);
+    let p2_res: i128 = part2(&input_file);
     println!("Part 2: {}", p2_res);
     println!("-----------------------");
     
     return Ok(())
 }
 
-fn part1(input_lines: &String) -> i64 {
+fn part1(input_lines: &String) -> i128 {
     let mut lines = input_lines.lines();
 
     // Find Seeds
     let mut seeds = lines.next().unwrap();
     seeds = seeds.split(": ").nth(1).unwrap();
-    let seeds: Vec<i64> = seeds.split_whitespace().map(|x| x.trim().parse().unwrap()).collect();
+    let seeds: Vec<i128> = seeds.split_whitespace().map(|x| x.trim().parse().unwrap()).collect();
     
-    let mut seed_map: HashMap<i64, i64> = HashMap::new();
+    let mut seed_map: HashMap<i128, i128> = HashMap::new();
     for seed in &seeds {
         seed_map.insert(*seed, *seed);
     }
@@ -29,18 +29,18 @@ fn part1(input_lines: &String) -> i64 {
     return process(lines, seed_map);
 }
 
-fn part2(input_lines: &String) -> i64 {
+fn part2(input_lines: &String) -> i128 {
     let mut lines = input_lines.lines();
 
     // Find Seeds
     let mut seeds = lines.next().unwrap();
     seeds = seeds.split(": ").nth(1).unwrap();
-    let seeds: Vec<i64> = seeds.split_whitespace().map(|x| x.trim().parse().unwrap()).collect();
+    let seeds: Vec<i128> = seeds.split_whitespace().map(|x| x.trim().parse().unwrap()).collect();
     println!("seeds {:?}", seeds);
-    let starters: Vec<i64> = seeds.clone().into_iter()
+    let starters: Vec<i128> = seeds.clone().into_iter()
                         .step_by(2)
                         .collect();
-    let ranges: Vec<i64> = seeds.into_iter()
+    let ranges: Vec<i128> = seeds.into_iter()
                         .skip(1)
                         .step_by(2)
                         .collect();
@@ -49,7 +49,7 @@ fn part2(input_lines: &String) -> i64 {
     println!("ranges {:?}", ranges);
     
 
-    let mut seed_map: HashMap<i64, i64> = HashMap::new();
+    let mut seed_map: HashMap<i128, i128> = HashMap::new();
     for i in 0..starters.len() {
         let start = starters[i];
         println!("{} -> {:?}", start, ranges[i]);
@@ -62,24 +62,24 @@ fn part2(input_lines: &String) -> i64 {
 }
 
 
-fn build_map(nums: &mut Vec<i64>) -> HashMap<(i64, i64), (i64, i64)> {
+fn build_map(nums: &mut Vec<i128>) -> HashMap<(i128, i128), (i128, i128)> {
     //print!("--Building!");
     if nums.len() < 2 { panic!() }
-    let range: i64 = nums[2];
-    let source: i64 = nums[1];
-    let destn: i64 = nums[0];
+    let range: i128 = nums[2];
+    let source: i128 = nums[1];
+    let destn: i128 = nums[0];
 
-    let mut map: HashMap<(i64, i64), (i64, i64)> = HashMap::new();
+    let mut map: HashMap<(i128, i128), (i128, i128)> = HashMap::new();
     map.insert((source, source+range), (destn, destn+range));
     //println!("{:?}", map);
     return map;
 }
 
-fn compare_maps(source_map: HashMap<i64, i64>, dest_map: HashMap<(i64, i64), (i64, i64)>) -> HashMap<i64, i64> {
+fn compare_maps(source_map: HashMap<i128, i128>, dest_map: HashMap<(i128, i128), (i128, i128)>) -> HashMap<i128, i128> {
     //println!("--Comparing!");
     //println!("src: {:?}", source_map);
     //println!("dst {:?}", dest_map);
-    let mut map: HashMap<i64, i64> = HashMap::new();
+    let mut map: HashMap<i128, i128> = HashMap::new();
     for (seed, value) in &source_map {
         let mut found: bool = false;
         for ((source_min, source_max), (dest_min, _dest_max)) in &dest_map {
@@ -100,10 +100,10 @@ fn compare_maps(source_map: HashMap<i64, i64>, dest_map: HashMap<(i64, i64), (i6
     return map;
 }
 
-fn process(lines: Lines, seed_map: HashMap<i64, i64>) -> i64 {
-    let mut seed_map: HashMap<i64, i64> = seed_map;
+fn process(lines: Lines, seed_map: HashMap<i128, i128>) -> i128 {
+    let mut seed_map: HashMap<i128, i128> = seed_map;
     let mut building: bool = false;
-    let mut tmp_map: HashMap<(i64, i64), (i64, i64)> = HashMap::new();
+    let mut tmp_map: HashMap<(i128, i128), (i128, i128)> = HashMap::new();
     for line in lines {
         if line.contains("map:") {
             println!("{}", line);
@@ -116,7 +116,7 @@ fn process(lines: Lines, seed_map: HashMap<i64, i64>) -> i64 {
         }
         
         if building {
-            let mut map_input: Vec<i64> = line.split_whitespace().map(|x| x.parse().unwrap()).collect();
+            let mut map_input: Vec<i128> = line.split_whitespace().map(|x| x.parse().unwrap()).collect();
             let m2 = build_map(&mut map_input);
             tmp_map.extend(m2)
         }
