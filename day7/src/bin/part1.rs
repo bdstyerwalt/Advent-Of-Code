@@ -98,6 +98,7 @@ fn process(input: &str) -> i32 {
     return total_winnings;
 }
 
+/*
 fn check_high_card(h1: &Hand, h2: &Hand) -> bool{
     // Comparing the first card in each hand; return winner
     // Case of tie, proceed to next card, etc
@@ -109,12 +110,13 @@ fn check_high_card(h1: &Hand, h2: &Hand) -> bool{
     }
     return false;
 }
+*/
 
 #[cfg(test)]
 mod tests {
     use std::vec;
 
-    use crate::{process, Hand, check_high_card};
+    use crate::{process, Hand};
 
     #[test]
     fn part1_sample() {
@@ -122,6 +124,7 @@ mod tests {
         assert_eq!(6440, process(&input));
     }
 
+    /*
     #[test]
     fn hand1_higher_than_hand2() {
         let h1 = Hand::new("6AAQK".to_string(), 69);
@@ -129,6 +132,7 @@ mod tests {
         assert!(check_high_card(&h1, &h2));
         assert_eq!(false, check_high_card(&h2, &h1));
     }
+    */
 
     #[test]
     fn test_card_values() {
