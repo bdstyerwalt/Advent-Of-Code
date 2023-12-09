@@ -10,8 +10,8 @@ fn process(input: &str) -> i32 {
     for line in input.lines() {
         let values: Vec<i32> = line.split_whitespace().map(|x| x.trim().parse().unwrap()).collect();
         let mut history: Vec<Vec<i32>> = calculate_history(values);
-        history = extrapolate(history);
-        result += history.last().unwrap().last().unwrap();
+        history = extrapolate_backwards(history);
+        result += history.last().unwrap().first().unwrap();
     }
     return result;
 }
@@ -33,12 +33,12 @@ fn calculate_history(values: Vec<i32>) -> Vec<Vec<i32>> {
     return total_history;
 }
 
-fn extrapolate(mut history: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
+fn extrapolate_backwards(mut history: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
     history.reverse();
-    history[0].push(0);
+    history[0].insert(0, 0);
     for i in 1..history.len() {
-        let val: i32 = history[i].last().unwrap() + history[i-1].last().unwrap();
-        history[i].push(val);
+        let val: i32 = history[i].first().unwrap() - history[i-1].first().unwrap();
+        history[i].insert(0, val);
     }
     return history;
 }
@@ -50,6 +50,6 @@ mod tests {
     #[test]
     fn test_sample() {
         let input = include_str!("sample.txt");
-        assert_eq!(114, process(input));
+        assert_eq!(2, process(input));
     }
 }
