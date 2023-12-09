@@ -40,7 +40,6 @@ fn part2(input_lines: &String) -> u64 {
     // send the rest of the input to map builder
     let seed_to_loc_maps: Vec<Vec<(Range<u64>, Range<u64>)>> = build_part2_maps(lines);
     
-    let mut min_val = u64::MAX;
     let mut locations: Vec<u64> = vec![];
     for seed_range in seeds.chunks(2) {
         println!("{}->{}", seed_range[0], seed_range[0]+seed_range[1]);
@@ -48,19 +47,14 @@ fn part2(input_lines: &String) -> u64 {
             //print!("\nSeed {} | ", seed);
             for map in &seed_to_loc_maps {
                 for (source, destin) in map {
-                    let old_seed = seed;
                     if source.contains(&seed) {
                         seed = seed + destin.start-source.start;
-                        //print!("{}->{}, ", old_seed, seed);                        
                         break
                     }
-                    //print!("{}->{}, ", old_seed, seed);                        
                 }
             }
             locations.push(seed)
-            //min_val = min_val.min(seed);
         }
-        //println!()
     }
     println!("{:?}", locations);
     return *locations.iter().min().unwrap();
@@ -171,7 +165,6 @@ fn build_part2_maps(lines: Lines) -> Vec<Vec<(Range<u64>, Range<u64>)>> {
 
 #[cfg(test)]
 mod tests {
-    use std::{fs};
     use crate::part1;
     use crate::part2;
 
