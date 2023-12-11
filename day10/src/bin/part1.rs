@@ -166,4 +166,10 @@ mod tests {
         let input = include_str!("complex_noisy.txt");
         assert_eq!(8, process(input));
     }
+
+    #[test]
+    fn test_part1_soln() {
+        let input = include_str!("input.txt");
+        assert_eq!(6738, process(input));
+    }
 }
