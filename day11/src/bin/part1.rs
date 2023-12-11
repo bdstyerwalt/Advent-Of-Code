@@ -1,4 +1,4 @@
-use std::{str::Lines, collections::HashMap};
+use std::collections::HashMap;
 
 fn main() {
     let input = include_str!("input.txt");
