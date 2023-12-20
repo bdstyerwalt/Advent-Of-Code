@@ -24,8 +24,8 @@ fn process(input: &str) -> usize {
 fn parse_spring_groups(input: &str) -> Vec<SpringGrouping> {
     let mut puzzles: Vec<SpringGrouping> = vec![];
 
-    let line_cnt = input.clone().lines().count();
-    for (i, line) in input.lines().enumerate() {
+    let _line_cnt = input.clone().lines().count();
+    for (_i, line) in input.lines().enumerate() {
         // println!("{} out of {}", i+1, line_cnt);
         let (springs, numbers) = line.split_once(" ").unwrap();
 
