@@ -101,9 +101,9 @@ impl RockPlatform {
 
 enum Direction {
     North,
-    South,
-    East,
-    West,
+    // South,
+    // East,
+    // West,
 }
 
 #[cfg(test)]
