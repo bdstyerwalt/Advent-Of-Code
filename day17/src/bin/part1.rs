@@ -63,7 +63,7 @@ impl Puzzle {
     }
 
     fn a_star_3_step_lim(&mut self) {
-        self.g_score.insert(self.start, 0);
+        self.g_score.insert(self.start, *self.city_map.get(&self.start).expect("coords should exist"));
         self.f_score.insert(self.start, *self.city_map.get(&self.start).expect("coords should exist"));
 
         while !self.open_set.is_empty() {
@@ -77,21 +77,24 @@ impl Puzzle {
             println!("Exploring {},{}", curr_pos.0, curr_pos.1);
             if curr_pos == self.goal {
                 println!("*****CALCULATING*****");
-                self.calculate_path_score(curr_val);
+                println!("Score: {curr_val}");
+                self.calculate_path_score(&curr_pos);
                 return;
             }
 
             let neighbors = Puzzle::get_neighbors(&curr_pos, &self.goal);
             for n_pos in neighbors {
                 let tent_g = *self.g_score.get(&curr_pos).expect("Shold find g");
-                // println!("Neighbor {},{}", n_pos.0, n_pos.1);
+                print!("| N {},{} = {tent_g} ", n_pos.0, n_pos.1);
                 if &tent_g < self.g_score.get(&n_pos).expect("Should find g at") {
                     self.came_from.insert(n_pos, curr_pos);
                     self.g_score.insert(n_pos, tent_g);
                     self.f_score.insert(n_pos, tent_g + self.city_map.get(&n_pos).expect("Should find coords"));
                     self.open_set.insert(n_pos);
+                    println!("\n*****FScore {},{} = {}", n_pos.0, n_pos.1, self.f_score.get(&n_pos).expect("Should find coords"));
                 }
             }
+            println!("|\n");
         }
         println!("*****Ran out of nodes*****");
         dbg!(&self.goal);
@@ -120,17 +123,16 @@ impl Puzzle {
         return neighbors;
     }
 
-    fn calculate_path_score(&mut self, current: u32) {
-        let score = self.came_from.iter().fold(current, |acc, (keys, _values)| {
-            let (k1, k2) = (keys.0, keys.1);
-            match self.city_map.get(&(k1, k2)) {
-                Some(val) => {
-                    println!("value at ({k1},{k2}) {val}");
-                    acc + val
-                },
-                None => acc,
-            }
-        });
+    fn calculate_path_score(&mut self, curr_pos: &(usize, usize)) {
+        let mut curr_pos = curr_pos;
+        let mut score = *self.city_map.get(curr_pos).unwrap();
+        let cnt = 0;
+        while self.came_from.contains_key(curr_pos) {
+            print!("Step {cnt}: curr: {},{} | ", curr_pos.0, curr_pos.1);
+            curr_pos = self.came_from.get(curr_pos).unwrap();
+            score += self.city_map.get(curr_pos).unwrap();
+            println!("new curr {},{} with score {}", curr_pos.0, curr_pos.1, self.city_map.get(curr_pos).unwrap())
+        }
         println!("Score is {score}");
         self.min_heat_loss = score;
     }
