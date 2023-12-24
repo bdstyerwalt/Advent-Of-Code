@@ -8,7 +8,7 @@ fn main() {
     dbg!(output);
 }
 
-fn process(input: &str) -> usize {
+fn parse(input: &str) -> Puzzle {
     let mut width: usize = 0;
     let lines = input.lines();
     let height: usize = lines.clone().count();
@@ -19,48 +19,13 @@ fn process(input: &str) -> usize {
             if ch == '.' { None } else { Some(((row, col), Mirror::from_ch(ch))) }
         })
     }).collect::<HashMap<(usize, usize), Mirror>>();  
-    
-    let mut puzzle = Puzzle::new(mirror_map, HashSet::new(), HashSet::new(), width, height);
-    // dbg!(&puzzle);
+    return Puzzle::new(mirror_map, HashSet::new(), HashSet::new(), width, height);
+}
 
-    let mut new_dirs = vec![];
-    match puzzle.mirror_map.get(&(0, 0)) {
-        Some(mirror) => {
-            let temp_dirs = eval_mirror(mirror.clone(), &East);
-            for dir in temp_dirs {
-                println!("NEW STARTING DIR {:?}", dir);
-                new_dirs.push((0, 0, dir));
-            }
-        }
-        None => new_dirs = walk(&mut puzzle, 0, 0, &East),
-    }
-    
-    while !new_dirs.is_empty() && !puzzle.mirror_map.is_empty(){
-        let (row, col, dir) = new_dirs.remove(0);
-
-        match dir {
-            North => {
-                if row == 0 { continue; }
-            },
-            South => {
-                if row == puzzle.height-1 { continue; }
-            },
-            East => {
-                if col == puzzle.width-1 { continue; }
-            },
-            West => {
-                if col == 0 { continue; }
-            },
-        }
-        // println!("Now walking {:?} from point ({row},{col})", &dir);
-        if !puzzle.visited_pipes.contains(&(row, col, dir)) {
-            let next_dirs = walk(&mut puzzle, row, col, &dir);
-            new_dirs.extend(next_dirs);
-            puzzle.visited_pipes.insert((row, col, dir));
-        }
-    }
-    // dbg!(&puzzle.visited_set);
-
+fn print_answser(puzzle: &mut Puzzle) {
+    let (start_row, start_col, start_dir) = puzzle.best_pos;
+    println!("BEST START POS: row {}, col {}, dir {:?}", start_row, start_col, start_dir);
+    puzzle.evaluate(start_row, start_col, start_dir);
     for row in 0..puzzle.height {
         for col in 0..puzzle.width {
             if puzzle.visited_set.contains(&(row, col)) {
@@ -71,9 +36,31 @@ fn process(input: &str) -> usize {
         }
         println!();
     }
-    dbg!(puzzle.width);
-    dbg!(puzzle.height);
-    return puzzle.visited_set.iter().count();
+}
+
+fn process(input: &str) -> usize {
+    let mut puzzle: Puzzle = parse(input);
+    for row in 0..puzzle.height {
+        for col in 0..puzzle.width {
+            if row == 0 {
+                puzzle.evaluate(row, col, South)
+            }
+
+            if col == 0 {
+                puzzle.evaluate(row, col, East);
+            }
+
+            if row == puzzle.height {
+                puzzle.evaluate(row, col, North)
+            }
+
+            if col == puzzle.width {
+                puzzle.evaluate(row, col, West);
+            }
+        }
+    }
+    print_answser(&mut puzzle);
+    return puzzle.max_energized;
 }
 
 fn walk(puzzle: &mut Puzzle, curr_row: usize, curr_col: usize, curr_dir: &Direction) -> Vec<(usize, usize, Direction)> {
@@ -220,6 +207,8 @@ struct Puzzle {
     visited_set: HashSet<(usize, usize)>,
     width: usize,
     height: usize,
+    max_energized: usize,
+    best_pos: (usize, usize, Direction)
 }
 
 impl Puzzle {
@@ -231,6 +220,60 @@ impl Puzzle {
             visited_pipes: visited_pipes,
             width: width,
             height: height,
+            max_energized: 0,
+            best_pos: (0, 0, North)
+        }
+    }
+
+    fn evaluate(&mut self, start_row: usize, start_col: usize, start_dir: Direction) {
+        self.visited_pipes.clear();
+        self.visited_set.clear();
+        
+        let mut new_dirs = vec![];
+        match self.mirror_map.get(&(start_row, start_col)) {
+            Some(mirror) => {
+                let temp_dirs = eval_mirror(mirror.clone(), &start_dir);
+                for dir in temp_dirs {
+                    // println!("NEW STARTING DIR {:?}", dir);
+                    new_dirs.push((start_row, start_col, dir));
+                }
+            }
+            None => new_dirs = walk(self, start_row, start_col, &start_dir),
+        }
+        
+        while !new_dirs.is_empty() && !self.mirror_map.is_empty(){
+            let (row, col, dir) = new_dirs.remove(0);
+
+            match dir {
+                North => {
+                    if row == 0 { continue; }
+                },
+                South => {
+                    if row == self.height-1 { continue; }
+                },
+                East => {
+                    if col == self.width-1 { continue; }
+                },
+                West => {
+                    if col == 0 { continue; }
+                },
+            }
+            // println!("Now walking {:?} from point ({row},{col})", &dir);
+            if !self.visited_pipes.contains(&(row, col, dir)) {
+                let next_dirs = walk(self, row, col, &dir);
+                new_dirs.extend(next_dirs);
+                self.visited_pipes.insert((row, col, dir));
+            }
+        }
+        
+        self.check_max(start_row, start_col, start_dir)
+    }
+
+    fn check_max(&mut self, row: usize, col: usize, init_dir: Direction) {
+        let count = self.visited_set.iter().count();
+        if count > self.max_energized {
+            self.max_energized = count;
+            self.best_pos = (row, col, init_dir);
         }
     }
 }
@@ -281,6 +324,6 @@ mod tests {
     #[test]
     fn test_sample() {
         let input = include_str!("sample.txt");
-        assert_eq!(46, process(input));
+        assert_eq!(51, process(input));
     }
 }
