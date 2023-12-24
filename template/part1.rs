@@ -5,11 +5,15 @@ fn main() {
 }
 
 fn parse(input: &str) -> Puzzle { 
-
+    todo!();
 }
 
 fn process(input: &str) -> usize {
+    todo!();
+}
 
+struct Puzzle {
+    
 }
 
 
