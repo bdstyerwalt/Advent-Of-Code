@@ -1,4 +1,5 @@
 use std::{collections::{HashSet, HashMap}, usize};
+use Direction::{Up, Down, Left, Right};
 
 fn main() {
     let input = include_str!("input.txt");
@@ -7,20 +8,19 @@ fn main() {
 }
 
 fn parse(input: &str) -> Puzzle { 
-    let lines = input.lines();
-    let mut goal = (lines.clone().count()-1, 0);
-    let city_map = lines.enumerate().flat_map(|(row, line)| {
-        goal.1 = line.len()-1;
+    let lines_meta_data = input.clone().lines();
+    let goal = Position::new(lines_meta_data.count()-1, lines_meta_data.next().unwrap().len()-1);
+    let city_map = input.lines().enumerate().flat_map(|(row, line)| {
         line.chars().enumerate().map(move |(col, ch)| {
-            ((row, col), ch.to_string().trim().parse().expect("Should be valid number"))
+            return (Position::new(row, col), ch.to_string().trim().parse().expect("Should be valid number"))
         })
-    }).collect::<HashMap<(usize, usize), u32>>();
+    }).collect::<HashMap<Position, u32>>();
 
     let mut g_score = HashMap::new();
     let mut f_score = HashMap::new();
-    for ((k1, k2), _v) in &city_map {
-        g_score.insert((k1.clone(), k2.clone()), u32::MAX);
-        f_score.insert((k1.clone(), k2.clone()), u32::MAX);
+    for (pos, _v) in &city_map {
+        g_score.insert(pos, u32::MAX);
+        f_score.insert(pos, u32::MAX);
     }
 
     return Puzzle::new(city_map, goal, g_score, f_score);
@@ -34,27 +34,28 @@ fn process(input: &str) -> u32 {
 
 
 struct Puzzle {
-    city_map: HashMap<(usize, usize), u32>,
-    start: (usize, usize),
-    goal: (usize, usize),
-    g_score: HashMap<(usize, usize), u32>,
-    f_score: HashMap<(usize, usize), u32>,
-    open_set: HashSet<(usize, usize)>,
-    came_from: HashMap<(usize, usize), (usize, usize)>,
+    city_map: HashMap<Position, u32>,
+    start: Position,
+    goal: Position,
+    g_score: HashMap<Position, u32>,
+    f_score: HashMap<Position, u32>,
+    open_set: HashSet<Position>,
+    came_from: HashMap<Position, Position>,
     min_heat_loss: u32,
 }
 
 impl Puzzle {
-    fn new(city_map: HashMap<(usize, usize), u32>, goal: (usize, usize),
-            g_score: HashMap<(usize, usize), u32>, 
-            f_score: HashMap<(usize, usize), u32>) -> Self {
+    fn new(city_map: HashMap<Position, u32>, goal: Position,
+            g_score: HashMap<&Position, u32>, 
+            f_score: HashMap<&Position, u32>) -> Self {
+        let start = Position::new(0, 0);
         let mut open_set = HashSet::new();
-        open_set.insert((0, 0));
+        open_set.insert(start);
         Self {
             city_map: city_map,
             g_score: g_score, 
             f_score: f_score,
-            start: (0, 0),
+            start: start,
             goal: goal,
             open_set: open_set,
             came_from: HashMap::new(),
@@ -84,46 +85,22 @@ impl Puzzle {
 
             let neighbors = Puzzle::get_neighbors(&curr_pos, &self.goal);
             for n_pos in neighbors {
-                let tent_g = *self.g_score.get(&curr_pos).expect("Shold find g");
+                let tent_g = *self.g_score.get(&curr_pos).unwrap();
                 print!("| N {},{} = {tent_g} ", n_pos.0, n_pos.1);
-                if &tent_g < self.g_score.get(&n_pos).expect("Should find g at") {
+                if &tent_g < self.g_score.get(&n_pos).unwrap() {
                     self.came_from.insert(n_pos, curr_pos);
                     self.g_score.insert(n_pos, tent_g);
-                    self.f_score.insert(n_pos, tent_g + self.city_map.get(&n_pos).expect("Should find coords"));
+                    self.f_score.insert(n_pos, tent_g + self.city_map.get(&n_pos).unwrap());
                     self.open_set.insert(n_pos);
-                    println!("\n*****FScore {},{} = {}", n_pos.0, n_pos.1, self.f_score.get(&n_pos).expect("Should find coords"));
+                    println!("\n*****FScore {},{} = {}", n_pos.0, n_pos.1, self.f_score.get(&n_pos).unwrap());
                 }
             }
             println!("|\n");
         }
         println!("*****Ran out of nodes*****");
-        dbg!(&self.goal);
     }
 
-    fn get_neighbors(pos: &(usize, usize), max_pos: &(usize, usize)) -> Vec<(usize, usize)> {
-        let (start, stop) = *pos;
-        let mut neighbors: Vec<(usize, usize)> = vec![];
-
-        if start > 0 {
-            neighbors.push((start-1, stop))
-        }
-
-        if start < max_pos.0 {
-            neighbors.push((start+1, stop))
-        }
-
-        if stop > 0 {
-            neighbors.push((start, stop-1))
-        }
-
-        if stop < max_pos.1 {
-            neighbors.push((start, stop+1))
-        }
-
-        return neighbors;
-    }
-
-    fn calculate_path_score(&mut self, curr_pos: &(usize, usize)) {
+    fn calculate_path_score(&mut self, curr_pos: &Position) {
         let mut curr_pos = curr_pos;
         let mut score = *self.city_map.get(curr_pos).unwrap();
         let cnt = 0;
@@ -138,6 +115,67 @@ impl Puzzle {
     }
 }
 
+fn get_neighbors(pos: &Position, max_pos: &Position) -> Vec<Neighbor> {
+    let mut neighbors: Vec<Neighbor> = vec![];
+    let mut new_pos: Position = Position::new(pos.row, pos.col);
+    if new_pos.row > 0 {
+        new_pos.row -= 1;
+        neighbors.push(Neighbor::new(new_pos, Up))
+    }
+
+    if new_pos.row < max_pos.row {
+        new_pos.row += 1;
+        neighbors.push(Neighbor::new(new_pos, Down))
+    }
+
+    if new_pos.col > 0 {
+        new_pos.col -= 1;
+        neighbors.push(Neighbor::new(new_pos, Left))
+    }
+
+    if new_pos.col < max_pos.col {
+        new_pos.col += 1;
+        neighbors.push(Neighbor::new(new_pos, Right))
+    }
+
+    return neighbors;
+}
+
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash)]
+struct Position {
+    row: usize,
+    col: usize,
+}
+
+impl Position {
+    fn new(row: usize, col: usize) -> Self {
+        Self {
+            row,
+            col,
+        }
+    }
+}
+
+struct Neighbor {
+    pos: Position,
+    dir: Direction,
+}
+
+impl Neighbor {
+    fn new(pos: Position, dir: Direction) -> Self {
+        Self {
+            pos,
+            dir,
+        }
+    }
+}
+
+enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+}
 
 #[cfg(test)]
 mod tests {
