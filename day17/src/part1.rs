@@ -1,4 +1,5 @@
-use std::{collections::{HashSet, HashMap, BinaryHeap}, usize, cmp::Reverse};
+use std::collections::{HashSet, HashMap, BinaryHeap};
+use std::cmp::Ordering;
 
 mod direction;
 use direction::Direction;
@@ -119,37 +120,28 @@ impl Puzzle {
     }
 
     fn get_neighbors(pos: &(usize, usize), max_pos: &(usize, usize), dirs: &Vec<Direction>) -> Vec<((usize, usize), Direction)> {
-        let (start, stop) = *pos;
+        let (row, col) = *pos;
         let mut neighbors: Vec<((usize, usize), Direction)> = vec![];
-
-        let mut skip_dir = &Undefined;
-        if dirs.len() == 3 {
-            let first_dir = dirs.get(0).unwrap();
-            if Direction::are_all_equal(dirs) {
-                skip_dir = first_dir;
-                println!("SKIPDIRSSSSS: {:?}", dirs);
-            }
-        }
 
         let mut last_dir = &Undefined;
         if !dirs.is_empty() {
             last_dir = &dirs.last().unwrap();
         }
 
-        if start > 0 && skip_dir != &Up && last_dir != &Down {
-            neighbors.push(((start-1, stop), Up))
+        if row > 0 && last_dir != &Down {
+            neighbors.push(((row-1, col), Up))
         }
 
-        if start < max_pos.0 && skip_dir != &Down && last_dir != &Up   {
-            neighbors.push(((start+1, stop), Down))
+        if row < max_pos.0 && last_dir != &Up   {
+            neighbors.push(((row+1, col), Down))
         }
 
-        if stop > 0 && skip_dir != &Left && last_dir != &Right  {
-            neighbors.push(((start, stop-1), Left))
+        if col > 0 && last_dir != &Right  {
+            neighbors.push(((row, col-1), Left))
         }
 
-        if stop < max_pos.1 && skip_dir != &Right && last_dir != &Left  {
-            neighbors.push(((start, stop+1), Right))
+        if col < max_pos.1 && last_dir != &Left  {
+            neighbors.push(((row, col+1), Right))
         }
 
         return neighbors;
@@ -191,49 +183,62 @@ impl Puzzle {
 
         let mut dist = HashMap::new();
         let mut prev = HashMap::new();
-        let mut queue: HashMap<(usize, usize), Vec<Direction>> = HashMap::new();
+        let mut dirs: HashMap<(usize, usize), Vec<Direction>> = HashMap::new();
+        let mut queue: BinaryHeap<State> = BinaryHeap::new();
+
         for (key, _score) in &self.city_map {
             dist.insert(key.clone(), u32::MAX);
             prev.insert(key.clone(), None);
-            queue.insert(key.clone(), vec![]);
+            dirs.insert(key.clone(), vec![]);
         }
         dist.insert(self.start.clone(), 0);
+        queue.push(State { pos: (0, 0), cost: 0 });
+        
 
-        while !queue.is_empty() {
-            let (pos, d) = dist.iter()
-                            .filter(|((r, c), _v)| queue.contains_key(&(*r, *c)))
-                            .min_by_key(|(_p, d)| *d).unwrap().clone();
-            let pos = *pos;
-            let d = *d;
-            let dirs = queue.remove(&pos).unwrap();
-            // dist.remove(&pos);
+        while let Some(State { pos, cost }) = queue.pop() {
+            let curr_dirs = dirs.get(&pos).unwrap().to_vec();
+            println!("Exploring {},{} with {cost}", pos.0, pos.1);
 
-            println!("Exploring {},{}", pos.0, pos.1);
+            // if pos == self.goal { 
+            //     self.min_heat_loss = Puzzle::calculate_path_score_dijkstra(&self.city_map, &prev, &self.goal.clone());
+            //     return;
+            // }
 
-            let neighbors = Puzzle::get_neighbors(&pos, &self.goal, &dirs);
+            if &cost > dist.get(&pos).unwrap() {
+                continue;
+            }
+
+
+            let neighbors = Puzzle::get_neighbors(&pos, &self.goal, &curr_dirs);
+            // println!("{:?}", &neighbors);
             for (n_pos, ndir) in neighbors {
-                let mut ndirs = dirs.to_vec();
-                if !queue.contains_key(&n_pos) { continue; }
+                let mut ndirs = curr_dirs.to_vec();
+                let next = State { pos: n_pos, cost: cost + self.city_map.get(&n_pos).unwrap() };
                 
-                // if n_pos == self.goal {
-                //     prev.insert(n_pos.clone(), Some(pos.clone()));
-                //     self.calculate_path_score_dijkstra(prev, &n_pos);
-                //     return;
-                // }
+                let mut skip_dir = &Undefined;
+                if ndirs.len() == MAX_WALK && Direction::are_all_equal(&ndirs) {
+                    skip_dir = ndirs.get(0).unwrap();
+                }
 
-                let alt = d + self.city_map.get(&n_pos).unwrap();
-                print!("| N {},{} = {alt} ", n_pos.0, n_pos.1);
-                if &alt < dist.get(&n_pos).unwrap() {
-                    queue.remove(&n_pos).unwrap();
+                if skip_dir == &ndir {
+                    continue;
+                }
+                queue.push(next);
+                
+                if &next.cost <= dist.get(&next.pos).unwrap() {
+                    print!("| N {},{} = {} ", n_pos.0, n_pos.1, next.cost);
+                    
+                    // Handle the consecutive dirs
                     if ndirs.len() == MAX_WALK {
                         // println!("-------------{:?}", ndirs);
                         ndirs.remove(0);
                     }
                     ndirs.push(ndir);
                     print!("{:?}", ndirs);
-                    queue.insert(n_pos.clone(), ndirs.to_vec());
                     
-                    dist.insert(n_pos.clone(), alt);
+                    
+                    dirs.insert(n_pos.clone(), ndirs);
+                    dist.insert(n_pos.clone(), next.cost);
                     prev.insert(n_pos.clone(), Some(pos.clone()));
                 }
             }
@@ -274,6 +279,34 @@ impl Puzzle {
         return score.iter().sum();
     }
 
+}
+
+
+
+#[derive(Copy, Clone, Eq, PartialEq)]
+struct State {
+    pos: (usize, usize),
+    cost: u32,
+}
+
+// The priority queue depends on `Ord`.
+// Explicitly implement the trait so the queue becomes a min-heap
+// instead of a max-heap.
+impl Ord for State {
+    fn cmp(&self, other: &Self) -> Ordering {
+        // Notice that the we flip the ordering on costs.
+        // In case of a tie we compare positions - this step is necessary
+        // to make implementations of `PartialEq` and `Ord` consistent.
+        other.cost.cmp(&self.cost)
+            .then_with(|| self.pos.cmp(&other.pos))
+    }
+}
+
+// `PartialOrd` needs to be implemented as well.
+impl PartialOrd for State {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 
