@@ -71,6 +71,7 @@ impl Puzzle {
         return ((goal.0 - curr_pos.0) + (goal.1 - curr_pos.1) ) as u32
     }
 
+    #[allow(dead_code)]
     fn a_star_3_step_lim(&mut self) {
         self.g_score.insert(self.start, *self.city_map.get(&self.start).expect("coords should exist"));
         self.f_score.insert(self.start, *self.city_map.get(&self.start).expect("coords should exist"));
@@ -179,113 +180,69 @@ impl Puzzle {
     }
 
     fn dijkstra(&mut self) {
-        let MAX_WALK = 3;
+        let max_walk = 3;
+        let min_walk = 1;
 
-        let mut dist = HashMap::new();
-        let mut prev = HashMap::new();
-        let mut dirs: HashMap<(usize, usize), Vec<Direction>> = HashMap::new();
+        println!("Max Row {}, Max Col {}", self.goal.0, self.goal.1);
+
         let mut queue: BinaryHeap<State> = BinaryHeap::new();
+        let mut visited = HashSet::new();
 
-        for (key, _score) in &self.city_map {
-            dist.insert(key.clone(), u32::MAX);
-            prev.insert(key.clone(), None);
-            dirs.insert(key.clone(), vec![]);
-        }
-        dist.insert(self.start.clone(), 0);
-        queue.push(State { pos: (0, 0), cost: 0 });
+        queue.push(State { pos: (0, 0), dir: 0, cost: 0 });
+        queue.push(State { pos: (0, 0), dir: 1, cost: 0 });
         
-
-        while let Some(State { pos, cost }) = queue.pop() {
-            let curr_dirs = dirs.get(&pos).unwrap().to_vec();
-            println!("Exploring {},{} with {cost}", pos.0, pos.1);
-
-            // if pos == self.goal { 
-            //     self.min_heat_loss = Puzzle::calculate_path_score_dijkstra(&self.city_map, &prev, &self.goal.clone());
-            //     return;
-            // }
-
-            if &cost > dist.get(&pos).unwrap() {
+        while let Some(State { pos, dir, cost }) = queue.pop() {
+            let orig_cost = cost;
+            let mut cost = cost;
+            
+            if pos == self.goal { 
+                // println!("REACHED GOALs {},{} with {cost} going {:?}", pos.0, pos.1, dir);
+                self.min_heat_loss = cost;
+                return;
+            }
+            
+            if visited.contains(&(pos, dir)) {
                 continue;
             }
+            // println!("Exploring {},{} with {cost} going {:?}", pos.0, pos.1, dir);
+            visited.insert((pos, dir));
 
-
-            let neighbors = Puzzle::get_neighbors(&pos, &self.goal, &curr_dirs);
-            // println!("{:?}", &neighbors);
-            for (n_pos, ndir) in neighbors {
-                let mut ndirs = curr_dirs.to_vec();
-                let next = State { pos: n_pos, cost: cost + self.city_map.get(&n_pos).unwrap() };
-                
-                let mut skip_dir = &Undefined;
-                if ndirs.len() == MAX_WALK && Direction::are_all_equal(&ndirs) {
-                    skip_dir = ndirs.get(0).unwrap();
-                }
-
-                if skip_dir == &ndir {
-                    continue;
-                }
-                queue.push(next);
-                
-                if &next.cost <= dist.get(&next.pos).unwrap() {
-                    print!("| N {},{} = {} ", n_pos.0, n_pos.1, next.cost);
-                    
-                    // Handle the consecutive dirs
-                    if ndirs.len() == MAX_WALK {
-                        // println!("-------------{:?}", ndirs);
-                        ndirs.remove(0);
+            let (row, col) = (pos.0 as isize, pos.1 as isize);
+            for n in [-1, 1] {
+                cost = orig_cost;
+                let (mut new_row, mut new_col) = (row, col);
+                for step in min_walk..=max_walk {
+                    if dir == 1 {
+                        new_col = col + (step * n);
+                    } else {
+                        new_row = row + (step * n);
                     }
-                    ndirs.push(ndir);
-                    print!("{:?}", ndirs);
+
+                    if new_row < 0 || new_row > self.goal.0 as isize || 
+                        new_col < 0 || new_col > self.goal.1 as isize {
+                        break;
+                    }
+
+                    let new_pos = (new_row as usize, new_col as usize);
+                    let new_dir = 1 - dir;
+                    cost += *self.city_map.get(&new_pos).unwrap();
                     
-                    
-                    dirs.insert(n_pos.clone(), ndirs);
-                    dist.insert(n_pos.clone(), next.cost);
-                    prev.insert(n_pos.clone(), Some(pos.clone()));
+                    if visited.contains(&(new_pos, new_dir)) {
+                        continue;
+                    }
+                    queue.push(State { pos: new_pos, dir: new_dir, cost: cost })
                 }
             }
-            println!("\n")
+            self.min_heat_loss = cost;
         }
-        self.min_heat_loss = Puzzle::calculate_path_score_dijkstra(&self.city_map, &prev, &self.goal.clone());
-    }
-
-    fn calculate_path_score_dijkstra(city_map: &HashMap<(usize, usize), u32>, prev: &HashMap<(usize, usize), Option<(usize, usize)>>, curr_pos: &(usize, usize)) -> u32 {
-        let mut score: Vec<u32> = vec![];
-        let mut path: Vec<(usize, usize)> = vec![];
-        let mut u = prev.get(&curr_pos).unwrap();
-        path.insert(0, *curr_pos);
-        score.insert(0, *city_map.get(&curr_pos).unwrap());
-        dbg!(&path, &score);
-
-        while u.is_some() && u.unwrap() != (0, 0) {
-            let pos = u.unwrap();
-            println!("{:?} {}", pos, *city_map.get(&pos).unwrap());
-            path.insert(0, pos);
-            score.insert(0, *city_map.get(&pos).unwrap());
-            u = prev.get(&pos).unwrap();
-        }
-
-
-        for i in 0..=curr_pos.0 {
-            for j in 0..=curr_pos.1{
-
-                if path.contains(&(i, j)) {
-                    print!("#");
-                } else {
-                    print!(".");
-                }
-            }
-            println!();
-        }
-
-        return score.iter().sum();
     }
 
 }
 
-
-
 #[derive(Copy, Clone, Eq, PartialEq)]
 struct State {
     pos: (usize, usize),
+    dir: usize,
     cost: u32,
 }
 
@@ -298,7 +255,7 @@ impl Ord for State {
         // In case of a tie we compare positions - this step is necessary
         // to make implementations of `PartialEq` and `Ord` consistent.
         other.cost.cmp(&self.cost)
-            .then_with(|| self.pos.cmp(&other.pos))
+            // .then_with(|| self.pos.cmp(&other.pos))
     }
 }
 
@@ -316,6 +273,16 @@ mod tests {
     #[test]
     fn test_sample() {
         let input = include_str!("sample.txt");
-        assert_eq!(102, process(input));
+        let result = process(input);
+        dbg!(result);
+        assert_eq!(102, result);
+    }
+
+    #[test]
+    fn test_input() {
+        let input = include_str!("input.txt");
+        let result = process(input);
+        dbg!(result);
+        assert_eq!(953, result);
     }
 }
