@@ -29,6 +29,7 @@ mod tests {
     #[test]
     fn test_sample() {
         let input = include_str!("sample.txt");
-        assert_eq!(51, process(input));
+        // assert_eq!(, part1(input));
+        // assert_eq!(, part2(input));
     }
 }
