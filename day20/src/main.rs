@@ -11,60 +11,117 @@ fn parse(input: &str) -> HashMap<String, Module> {
     let mod_map = input.lines().map(|line| {
         let mut vals = line.split(" -> ");
         let loc = vals.next().unwrap();
+        let (t, mut loc) = loc.split_at(1);
+
         let dst = vals.next().unwrap();
         let dest_vec = dst.split(", ").map(|s| s.to_string()).collect();
 
         let module: Module;
-        if loc.contains("broadcaster") {
-            module = Module::Broadcast(Broadcaster { dest_vec });
-        } else if loc.contains("%") {
-            module = Module::FF(FlipFlop::new(dest_vec))
-        } else if loc.contains("&") {
-            module = Module::CJ(Conjunction::new(input_vec, dest_vec))
+        match t {
+            "b" => {
+                loc = "broadcaster";
+                module = Module::Broadcast(Broadcaster { dest_vec });
+            },
+            "%" => module = Module::FF(FlipFlop::new(dest_vec)),
+            "&" => module = Module::CJ(Conjunction::new(dest_vec)),    
+            _ => panic!("Should be one of the previous arms")        
         }
-        return module;
+        return (loc.to_string(), module);
     }).collect::<HashMap<String, Module>>();
 
-    dbg!(mod_map);
-    return mod_map;
+    let mut final_map = mod_map.clone();
+    for (i, (loc, module)) in mod_map.iter().enumerate() {
+        let mut new_conj: Conjunction;
+        match module {
+            Module::CJ(conj) => {
+                new_conj = conj.clone();
+                for (j, (l2, m2)) in mod_map.iter().enumerate() {
+                    if i == j { continue; }
+        
+                    let dest_vec: Vec<String>;
+                    match m2 {
+                        Module::FF(inner) => dest_vec = inner.dest_vec.clone(),
+                        Module::CJ(inner) => dest_vec = inner.dest_vec.clone(),
+                        Module::Broadcast(inner) => dest_vec = inner.dest_vec.clone(),
+                    }
+        
+                    for tgt in &dest_vec {
+                        if loc == tgt {
+                            new_conj.memory.insert(l2.to_string(), Pulse::Low);
+                        }
+                    }
+                }
+                final_map.insert(loc.to_string(), Module::CJ(new_conj));
+            },
+            _ => continue,
+        }
+        
+    }
+
+    return final_map;
 }
 
 fn part1(input: &str) -> u32 {   
-    let starting_pulse = Pulse::Low;
     let mut module_map = parse(input);
-    let mut propogation_queue: VecDeque<Propogation> = VecDeque::new();
-    propogation_queue.push_front(Propogation{ dest: "Brodcaster".to_string(), pulse: starting_pulse });
+    let (mut high, mut low) = (0, 0);
+    for _ in 0..1000 {
+        let res = process(&mut module_map, Pulse::Low);
+        high += res.0;
+        low += res.1;
+    }
+    return high * low;
+}
 
+fn process(module_map: &mut HashMap<String, Module>, starting_pulse: Pulse) -> (u32, u32) {
     let mut high_cnt = 0;
     let mut low_cnt = 0;
-    
-    while let Some(prop) = propogation_queue.pop_front() {
-        let (tgt, pls) = (prop.dest, prop.pulse);
-        // TODO: Figure out how this works with enums
-        let mut module = module_map.remove(&tgt).unwrap();
-        
-        let (next_pulse, dest_vec) = Module::process(&mut module, &tgt, pls);
-        
-        for d in dest_vec {
-            let new_prop = Propogation{ dest: d, pulse: next_pulse.clone() };
-            propogation_queue.push_back(new_prop);    
-        }
-        module_map.insert(tgt, module);
-
-        match next_pulse {
-            Pulse::High => high_cnt += 1,
-            Pulse::Low => low_cnt += 1,
-            Pulse::Zero => (),
-        }
+    match starting_pulse {
+        Pulse::High => high_cnt += 1,
+        Pulse::Low => low_cnt += 1,
+        Pulse::Zero => (),
     }
-    return high_cnt * low_cnt;
+
+    let mut propogation_queue: VecDeque<Propogation> = VecDeque::new();
+    propogation_queue.push_front(Propogation{ dest: "broadcaster".to_string(), pulse: starting_pulse });
+
+    while let Some(prop) = propogation_queue.pop_front() {
+        // dbg!(&prop);
+        let (tgt, pls) = (prop.dest, prop.pulse);
+
+        let module = module_map.get(&tgt).unwrap();
+        let dest_vec = module.get_dests();
+        let mut d_mod: Module;
+        for d in dest_vec {
+            let mut next_pulse = Pulse::Zero;
+            if module_map.contains_key(&d) {
+                d_mod = module_map.remove(&d).unwrap();
+                (d_mod, next_pulse) = Module::process(d_mod, tgt.clone(), pls);
+                module_map.insert(d.clone(), d_mod);
+            }
+            
+            println!("{tgt} -{pls}-> {d}");
+            match pls {
+                Pulse::High => high_cnt += 1,
+                Pulse::Low => low_cnt += 1,
+                Pulse::Zero => continue,
+            }
+            
+            if next_pulse == Pulse::Zero { continue; }
+            let new_prop = Propogation{ dest: d, pulse: next_pulse.clone() };
+            propogation_queue.push_back(new_prop);  
+        }
+        // dbg!(&propogation_queue);
+        // println!("------\n");
+    }
+    dbg!(&high_cnt, &low_cnt);
+    return (high_cnt, low_cnt);
 }
 
 fn part2(input: &str) -> u32 {   
     return 0;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct FlipFlop {
     is_on: bool,
     dest_vec: Vec<String>,
@@ -100,7 +157,7 @@ impl FlipFlop {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Conjunction {
     memory: HashMap<String, Pulse>,
     dest_vec: Vec<String>,
@@ -110,13 +167,13 @@ struct Conjunction {
 // received from each of their connected input modules
 impl Conjunction {
     // initially default to remembering a low pulse for each input
-    fn new(input_vec: Vec<String>, dest_vec: Vec<String>) -> Self {
-        let mem = input_vec.iter().map(|dest| {
-            (dest.clone(), Pulse::Low)
-        }).collect::<HashMap<String, Pulse>>();
+    fn new(dest_vec: Vec<String>) -> Self {
+        // let mem = input_vec.iter().map(|dest| {
+        //     (dest.clone(), Pulse::Low)
+        // }).collect::<HashMap<String, Pulse>>();
         
         Self {
-            memory: mem,
+            memory: HashMap::new(),
             dest_vec: dest_vec,
         }
     }
@@ -124,22 +181,24 @@ impl Conjunction {
     // When a pulse is received, the conjunction module first updates its memory for that input. 
     // Then, if it remembers high pulses for all inputs, it sends a low pulse; 
     // otherwise, it sends a high pulse.
-    fn process(&mut self, input: &String, pulse: Pulse) -> Pulse {
-        self.memory.insert(input.clone(), pulse);
+    fn process(&mut self, input: String, pulse: Pulse) -> Pulse {
+        // dbg!(&self.memory);
+        self.memory.insert(input, pulse);
+        // dbg!(&self.memory);
         
-        if self.memory.values().all(|inp| inp == &pulse) {
+        if self.memory.values().all(|inp| inp == &Pulse::High) {
             return Pulse::Low
         }
         return Pulse::High
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Broadcaster {
    dest_vec: Vec<String>, 
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum Module {
     FF(FlipFlop),
     CJ(Conjunction),
@@ -147,24 +206,29 @@ enum Module {
 }
 
 impl Module {
-    fn process(module: &mut Module, input: &String, pulse: Pulse) -> (Pulse, Vec<String>) {
+    fn process(module: Module, input: String, pulse: Pulse) -> (Module, Pulse) {
         let new_pulse: Pulse;
-        let dest_vec: Vec<String>;
         match module {
             Module::FF(mut flip) => { 
                 new_pulse = flip.process(pulse);
-                dest_vec = flip.dest_vec;
+                return (Module::FF(flip), new_pulse);
             },
             Module::CJ(mut conj) => {
                 new_pulse = conj.process(input, pulse);
-                dest_vec = conj.dest_vec;
+                return (Module::CJ(conj), new_pulse);
             },
             Module::Broadcast(bdcst) => {
-                new_pulse = pulse;
-                dest_vec = bdcst.dest_vec.clone();
+                return (Module::Broadcast(bdcst), pulse);
             },
         }
-        return (new_pulse, dest_vec);
+    }
+
+    fn get_dests(&self) -> Vec<String> {
+        match self {
+            Module::FF(flip) => return flip.dest_vec.clone(),
+            Module::CJ(conj) => return conj.dest_vec.clone(),
+            Module::Broadcast(bdcst) => return bdcst.dest_vec.clone(),
+        }
     }
 }
 
@@ -173,6 +237,12 @@ enum Pulse {
     Low,
     High,
     Zero,
+}
+
+impl std::fmt::Display for Pulse {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 #[derive(Debug)]
