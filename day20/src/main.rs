@@ -61,18 +61,62 @@ fn parse(input: &str) -> HashMap<String, Module> {
     return final_map;
 }
 
-fn part1(input: &str) -> u32 {   
+fn part1(input: &str) -> u64 {   
     let mut module_map = parse(input);
-    let (mut high, mut low) = (0, 0);
+    let (mut high_cnt, mut low_cnt) = (0, 0);
     for _ in 0..1000 {
-        let res = process(&mut module_map, Pulse::Low);
-        high += res.0;
-        low += res.1;
+        let res = process(&mut module_map, Pulse::Low, &"".to_string());
+        high_cnt += res.0;
+        low_cnt += res.1;
     }
-    return high * low;
+    dbg!(&high_cnt, &low_cnt);
+    return high_cnt * low_cnt;
 }
 
-fn process(module_map: &mut HashMap<String, Module>, starting_pulse: Pulse) -> (u32, u32) {
+fn part2(input: &str) -> u64 {   
+    let module_map = parse(input);
+
+    // find rx's predecessor
+    let mut rx_mod_name = "broadcaster".to_string();
+    for (name, m) in &module_map {
+        if m.get_dests().contains(&"rx".to_string()) {
+            rx_mod_name = name.clone();
+            break
+        }
+    }  
+
+    // find rx's predecessor's predecessors
+    let mut predecessors: Vec<String> = vec![];
+    for (name, m) in &module_map {
+        if m.get_dests().contains(&rx_mod_name) {
+            predecessors.push(name.clone());
+        }
+    }
+    dbg!(&predecessors);
+    // find the cycle count required to receive a high pulse at predecessor
+    let mut cycle_counts: Vec<u64> = vec![];
+    for module_name in predecessors { 
+        let mut module_map = parse(input);  
+        let mut cycle_num = 0;
+        loop {
+            cycle_num += 1;
+            let res = process(&mut module_map, Pulse::Low, &module_name);
+            if res.2 {
+                cycle_counts.push(cycle_num);
+                break;
+            }
+        }        
+        
+    }
+    dbg!(&cycle_counts);
+
+    // find lcm of cycle counts
+    let count = lcm(&cycle_counts);
+    return count;
+}
+
+fn process(module_map: &mut HashMap<String, Module>, starting_pulse: Pulse, tgt_module: &String) -> (u64, u64, bool) {
+    let mut found_tgt = false;
     let mut high_cnt = 0;
     let mut low_cnt = 0;
     match starting_pulse {
@@ -84,6 +128,7 @@ fn process(module_map: &mut HashMap<String, Module>, starting_pulse: Pulse) -> (
     let mut propogation_queue: VecDeque<Propogation> = VecDeque::new();
     propogation_queue.push_front(Propogation{ dest: "broadcaster".to_string(), pulse: starting_pulse });
 
+    
     while let Some(prop) = propogation_queue.pop_front() {
         // dbg!(&prop);
         let (tgt, pls) = (prop.dest, prop.pulse);
@@ -98,8 +143,13 @@ fn process(module_map: &mut HashMap<String, Module>, starting_pulse: Pulse) -> (
                 (d_mod, next_pulse) = Module::process(d_mod, tgt.clone(), pls);
                 module_map.insert(d.clone(), d_mod);
             }
+
             
-            println!("{tgt} -{pls}-> {d}");
+            if next_pulse == Pulse::High && tgt_module == &d {
+                found_tgt = true;
+            }
+            
+            // println!("{tgt} -{pls}-> {d}");
             match pls {
                 Pulse::High => high_cnt += 1,
                 Pulse::Low => low_cnt += 1,
@@ -113,12 +163,23 @@ fn process(module_map: &mut HashMap<String, Module>, starting_pulse: Pulse) -> (
         // dbg!(&propogation_queue);
         // println!("------\n");
     }
-    dbg!(&high_cnt, &low_cnt);
-    return (high_cnt, low_cnt);
+    return (high_cnt, low_cnt, found_tgt);
 }
 
-fn part2(input: &str) -> u32 {   
-    return 0;
+fn lcm(nums: &[u64]) -> u64 {
+    if nums.len() == 1 {
+        return nums[0];
+    }
+    let a = nums[0];
+    let b = lcm(&nums[1..]);
+    a * b / gcd_of_two_numbers(a, b)
+}
+
+fn gcd_of_two_numbers(a: u64, b: u64) -> u64 {
+    if b == 0 {
+        return a;
+    }
+    gcd_of_two_numbers(b, a % b)
 }
 
 #[derive(Debug, Clone)]
