@@ -138,7 +138,7 @@ fn part2(input: &str, step_total: usize) -> i64 {
     let n = ((step_total - 65) / (puzzle.max_col + 1)) as i64;
     println!("{n}");
     return (a*n*n) + (b*n) + c;
-    // 1952973769694283 "too high"
+    //  622926941971282
 }
 
 
