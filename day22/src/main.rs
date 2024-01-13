@@ -1,5 +1,6 @@
 use std::collections::{BinaryHeap, HashSet, VecDeque, HashMap};
 use std::cmp::Ordering;
+use std::hash::Hash;
 
 fn main() {
     let input = include_str!("input.txt");
@@ -46,8 +47,45 @@ fn part1(input: &str) -> usize {
     return disentegrate_count;
 }
 
-fn part2(_input: &str) -> usize {
-    return 0;
+fn part2(input: &str) -> usize {
+    let mut puzzle = parse(input);
+    puzzle.apply_slab_gravity();
+    puzzle.check_supporting_slabs();
+
+    let mut fall_count = 0;
+    for (_id, slabs) in &puzzle.supports {
+        let mut eval: VecDeque<String> = VecDeque::new();
+        let mut falling_slabs: HashSet<String> = HashSet::new();
+        for id2 in slabs {
+            let sby = puzzle.supported_by.get(id2).unwrap();
+            if sby.len() < 2 {
+                // if slab would fall add it to eval
+                eval.push_back(id2.clone());
+                falling_slabs.insert(id2.clone());
+            }
+        }       
+
+        while let Some(eval_id) = eval.pop_front() {
+            let slabs2 = puzzle.supports.get(&eval_id).unwrap();
+            for slab in slabs2 {
+                // if slab would fall add cascading slabs to eval
+                let sby = puzzle.supported_by.get(slab).unwrap();
+                if sby.iter().all(|s| falling_slabs.contains(s)) {
+                    // println!("{slab} would also fall because of {eval_id}");
+                    // if slab would fall add it to eval
+                    eval.push_back(slab.clone());
+                    falling_slabs.insert(slab.clone());
+                }
+            }
+        }
+        // if !falling_slabs.is_empty() {
+        //     println!("{id} would cause {falling_slabs:?} to fall: ");
+        // }
+        fall_count += falling_slabs.len();
+    }
+
+    // 77900 is too high
+    return fall_count;
 }
 
 struct Puzzle {
@@ -265,14 +303,14 @@ mod tests {
     fn test_sample() {
         let input = include_str!("sample.txt");
         assert_eq!(5, part1(input));
-        // assert_eq!(, part2(input));
+        assert_eq!(7, part2(input));
     }
 
     #[test]
     fn test_input() {
         let input = include_str!("input.txt");
         assert_eq!(393, part1(input));
-        // assert_eq!(, part2(input));
+        assert_eq!(58440, part2(input));
     }
 
     #[test]
