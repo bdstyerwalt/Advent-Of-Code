@@ -259,7 +259,7 @@ mod tests {
 	#[test]
 	fn test_input() {
         let input = include_str!("input.txt");
-        assert_eq!(2166, part1(input));
-        assert_eq!(6378, part2(input));
+        assert_eq!(2166, part1(input)); // 249ms
+        assert_eq!(6378, part2(input)); // 8hr 45m 41s
     }
 }
