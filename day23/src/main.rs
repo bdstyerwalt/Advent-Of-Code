@@ -1,11 +1,13 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::{collections::{HashMap, HashSet, VecDeque}, time::Instant};
 use Trail::*;
 
 fn main() {
+	let now = Instant::now();
 	let input = include_str!("input.txt");
 	let p1 = part1(input);
+	println!("Part 1: {p1} in [{}ms]", now.elapsed().as_millis());
 	let p2 = part2(input);
-	println!("Part 1: {p1}, Part 2: {p2}");
+	println!("Part 2: {p2} in [{}s]", now.elapsed().as_secs());
 }
 
 fn parse(input: &str) -> Puzzle {
@@ -34,18 +36,18 @@ fn parse(input: &str) -> Puzzle {
 
 fn part1(input: &str) -> usize {
     let mut puzzle = parse(input);
-    a_star(&mut puzzle);
-	dbg!(&puzzle.paths.keys());
+    a_star_p1(&mut puzzle);
 	let (max_path, visited) = puzzle.paths.iter().max_by_key(|(&key, _val)| key).unwrap();
 	puzzle.print_hiking_map(visited);
 	return *max_path;
 }
 
-fn part2(_input: &str) -> u32 {
-	return 0;
+fn part2(input: &str) -> usize {
+	let mut puzzle = parse(input);
+	return a_star_p2(&mut puzzle);
 }
 
-fn a_star(puzzle: &mut Puzzle) {
+fn a_star_p1(puzzle: &mut Puzzle) {
 	let mut exploration_queue: VecDeque<(Pos, HashSet<Pos>)> = VecDeque::new();
 	exploration_queue.push_back((puzzle.start_pos, HashSet::new()));
 
@@ -53,13 +55,13 @@ fn a_star(puzzle: &mut Puzzle) {
 		visited.insert(curr_pos);
 
 		if curr_pos == puzzle.target_pos {
-			println!("Found a path! lenght={}", visited.len());
+			// println!("Found a path! lenght={}", visited.len());
 			puzzle.paths.insert(visited.len()-1, visited); // minus one to remove starting position
 			continue;
 		}
 
 		let curr_trail = puzzle.hiking_map.get(&curr_pos).unwrap();
-		for n in get_neighbors(curr_pos, curr_trail, puzzle) {
+		for n in get_neighbors_part1(curr_pos, curr_trail, puzzle) {
 			if !visited.contains(&n) {
 				exploration_queue.push_back((n, visited.clone()))
 			}
@@ -67,7 +69,7 @@ fn a_star(puzzle: &mut Puzzle) {
 	}
 }
 
-fn get_neighbors(pos: Pos, trail: &Trail, puzzle: &Puzzle) -> Vec<Pos> {
+fn get_neighbors_part1(pos: Pos, trail: &Trail, puzzle: &Puzzle) -> Vec<Pos> {
 	let mut neighbors: Vec<Pos> = vec![];
 	for dir in [(-1, 0), (1, 0), (0, 1), (0, -1)] {
 		let mut row = pos.row.clone() as isize;
@@ -87,6 +89,56 @@ fn get_neighbors(pos: Pos, trail: &Trail, puzzle: &Puzzle) -> Vec<Pos> {
 			}
 			_ => (),
 		}
+
+		if row >= 0 && row <= puzzle.max_row as isize && col >= 0 && col <= puzzle.max_col as isize {
+			let row = row as usize;
+			let col = col as usize;
+			let new_pos = Pos {row, col};
+			
+			let n_trail = puzzle.hiking_map.get(&new_pos).unwrap();
+			match n_trail {
+				Forest => continue,
+				_ => neighbors.push(new_pos),
+			}			
+		}
+	}
+	return neighbors;
+}
+
+fn a_star_p2(puzzle: &mut Puzzle) -> usize {
+	let mut exploration_queue: VecDeque<(Pos, HashSet<Pos>)> = VecDeque::new();
+	exploration_queue.push_back((puzzle.start_pos, HashSet::new()));
+	let mut max_val = 0;
+
+	while let Some((curr_pos, mut visited)) = exploration_queue.pop_front() {
+		visited.insert(curr_pos);
+
+		if curr_pos == puzzle.target_pos {
+			let path_len = visited.len()-1;
+			if path_len > max_val {
+				println!("Found a path! lenght={path_len}, Q[{}]", exploration_queue.len());
+				max_val = path_len;
+			}
+			continue;
+		}
+
+		for n in get_neighbors_part2(curr_pos, puzzle) {
+			if !visited.contains(&n) {
+				exploration_queue.push_front((n, visited.clone()))
+			}
+		}
+	}
+
+	return max_val;
+}
+
+fn get_neighbors_part2(pos: Pos, puzzle: &Puzzle) -> Vec<Pos> {
+	let mut neighbors: Vec<Pos> = vec![];
+	for dir in [(-1, 0), (1, 0), (0, 1), (0, -1)] {
+		let mut row = pos.row.clone() as isize;
+		let mut col = pos.col.clone() as isize;
+		row += dir.0;
+		col += dir.1;
 
 		if row >= 0 && row <= puzzle.max_row as isize && col >= 0 && col <= puzzle.max_col as isize {
 			let row = row as usize;
@@ -201,6 +253,13 @@ mod tests {
     fn test_sample() {
         let input = include_str!("sample.txt");
         assert_eq!(94, part1(input));
-        // assert_eq!(7, part2(input));
+        assert_eq!(154, part2(input));
+    }
+
+	#[test]
+	fn test_input() {
+        let input = include_str!("input.txt");
+        assert_eq!(2166, part1(input));
+        assert_eq!(6378, part2(input));
     }
 }
