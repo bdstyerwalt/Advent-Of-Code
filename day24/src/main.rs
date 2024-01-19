@@ -34,9 +34,82 @@ fn part1(input: &str, left: f64, right: f64) -> usize {
     return evalue_test_area(puzzle, left..right);
 }
 
-fn part2(input: &str) -> usize {
+fn part2(input: &str) -> f64 {
     let puzzle = parse(input);
-    return 0;
+
+    // Get Rock X, Y, Vx, Vy
+    let mut a_matrix: Vec<Vec<f64>> = vec![vec![0f64; 4]; 4];
+    let mut b_matrix = [0f64; 4];
+    for i in 0..4 {
+        let hs1 = puzzle.hailstone_map.get(&i).unwrap();
+        let hs2 = puzzle.hailstone_map.get(&(i+1)).unwrap();
+                
+        a_matrix[i][0] = hs2.vel.y - hs1.vel.y;
+        a_matrix[i][1] = hs1.vel.x - hs2.vel.x;
+        a_matrix[i][2] = hs1.pos.y - hs2.pos.y;
+        a_matrix[i][3] = hs2.pos.x - hs1.pos.x;
+        
+        b_matrix[i] = (-hs1.pos.x * hs1.vel.y) + 
+                      (hs1.pos.y * hs1.vel.x) + 
+                      (hs2.pos.x * hs2.vel.y) - 
+                      (hs2.pos.y * hs2.vel.x);
+    }
+    gaussian_elim(&mut a_matrix, &mut b_matrix);
+    dbg!(&b_matrix);
+
+    let x = b_matrix[0].round();
+    let y = b_matrix[1].round();
+    let vx = b_matrix[2].round();
+    let vy = b_matrix[3].round();
+
+    // Get Z, VZ
+    let mut a_matrix: Vec<Vec<f64>> = vec![vec![0f64; 2]; 2];
+    let mut b_matrix = [0f64; 2];
+    for i in 0..2 {
+        let hs1 = puzzle.hailstone_map.get(&i).unwrap();
+        let hs2 = puzzle.hailstone_map.get(&(i+1)).unwrap();
+                
+        a_matrix[i][0] = hs1.vel.x - hs2.vel.x;
+        a_matrix[i][1] = hs2.pos.x - hs1.pos.x;
+        
+        b_matrix[i] = (-hs1.pos.x * hs1.vel.z) + 
+                      (hs1.pos.z * hs1.vel.x) + 
+                      (hs2.pos.x * hs2.vel.z) - 
+                      (hs2.pos.z * hs2.vel.x) - 
+                      ((hs2.vel.z - hs1.vel.z) * x) - 
+                      ((hs1.pos.z - hs2.pos.z) * vx);
+    }
+    dbg!(&a_matrix, &b_matrix);
+    gaussian_elim(&mut a_matrix, &mut b_matrix);
+    dbg!(&b_matrix);
+
+    let z = b_matrix[0].round();
+    let vz = b_matrix[1].round();
+
+    println!("Found Rock at ({x}, {y}, {z}) with vel ({vx}, {vy}, {vz})");
+
+    return x+y+z;
+}
+
+fn gaussian_elim(a: &mut Vec<Vec<f64>>, b: &mut [f64]) {
+    let n = a.len();
+    for i in 0..n {
+        let pivot = a[i][i];
+        for j in 0..n {
+            a[i][j] = a[i][j] / pivot;
+        }
+        b[i] = b[i] / pivot;
+
+        for k in 0..n {
+            if k != i {
+                let factor = a[k][i];
+                for m in 0..n {
+                    a[k][m] = a[k][m] - (factor * a[i][m])
+                }
+                b[k] = b[k] - (factor * b[i]);
+            }
+        }
+    }
 }
 
 fn evalue_test_area(puzzle: Puzzle, test_range: Range<f64>) -> usize {
@@ -159,7 +232,7 @@ mod tests {
     fn test_sample() {
         let input = include_str!("sample.txt");
         assert_eq!(2, part1(input, 7f64, 27f64));
-        // assert_eq!(154, part2(input));
+        assert_eq!(47f64, part2(input));
     }
 
 	#[test]
