@@ -17,3 +17,19 @@ jqt:
 ntq:
 rhn:
 xhk:
+
+lsr has 5 links -> {"lhk", "pzl", "rsh", "frs", "rzs"}
+pzl has 4 links -> {"rsh", "hfx", "lsr", "nvd"}       
+rzs has 4 links -> {"lsr", "rsh", "cmg", "qnr"}       
+rsh has 4 links -> {"pzl", "frs", "lsr", "rzs"}       
+cmg has 5 links -> {"nvd", "lhk", "bvb", "qnr", "rzs"}
+lhk has 4 links -> {"nvd", "frs", "lsr", "cmg"}       
+xhk has 5 links -> {"ntq", "hfx", "bvb", "rhn", "jqt"}
+qnr has 4 links -> {"frs", "nvd", "cmg", "rzs"}       
+bvb has 5 links -> {"hfx", "ntq", "cmg", "xhk", "rhn"}
+rhn has 4 links -> {"bvb", "xhk", "jqt", "hfx"}       
+nvd has 5 links -> {"qnr", "pzl", "lhk", "cmg", "jqt"}
+frs has 4 links -> {"qnr", "lhk", "rsh", "lsr"}       
+ntq has 4 links -> {"xhk", "bvb", "jqt", "hfx"}       
+jqt has 4 links -> {"rhn", "nvd", "xhk", "ntq"}       
+hfx has 5 links -> {"rhn", "bvb", "ntq", "pzl", "xhk"}
