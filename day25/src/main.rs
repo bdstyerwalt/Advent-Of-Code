@@ -212,8 +212,7 @@ mod tests {
 		graph.add_edge(six, seven, 1);
 		graph.add_edge(seven, eight, 3);
 
-		
-		let (cut_size, partition) = stoer_wagner(&graph);
+		let (_cut_size, partition) = stoer_wagner(&graph);
 		let res = partition.len() * (graph.verticies.len() - partition.len());
 		assert_eq!(16, res);
     }
