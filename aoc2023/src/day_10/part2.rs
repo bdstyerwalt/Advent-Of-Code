@@ -6,7 +6,7 @@ fn main() {
     dbg!(output);
 }
 
-fn process(input: &str) -> i32 {
+pub fn process(input: &str) -> i32 {
     let (pipe_map, mut maze_pos) = parse_maze(input);
     // println!("START: {:?} - ", maze_pos.start);
     check_borders_from_start(&mut maze_pos, &pipe_map);
@@ -19,17 +19,17 @@ fn process(input: &str) -> i32 {
         }
     }
     
-    for p in &maze_pos.path {
-        print!("->({},{})", p.0, p.1);
-    }
+    // for p in &maze_pos.path {
+    //     print!("->({},{})", p.0, p.1);
+    // }
 
-    println!("\n{:?}", maze_pos.verticies);
+    // println!("\n{:?}", maze_pos.verticies);
     find_starting_vertex(&mut maze_pos.verticies);
-    println!("\n{:?}", maze_pos.verticies);
+    // println!("\n{:?}", maze_pos.verticies);
 
     let area = shoelace_formula(&maze_pos.verticies);
     let interior = picks_therom(&maze_pos, area);
-    println!("Area = {}, Interior Points = {}", area, interior);
+    // println!("Area = {}, Interior Points = {}", area, interior);
     return interior;
 }
 
@@ -196,7 +196,7 @@ fn picks_therom(maze_pos: &Position, area: i32) -> i32 {
 
     // find i: i = A - b/2 + 1
     let b = (maze_pos.path.len() + 1) as i32;
-    println!("number of points on boundary: {b}");
+    // println!("number of points on boundary: {b}");
     let interior_points = area - (b/2) + 1;
 
     return interior_points;

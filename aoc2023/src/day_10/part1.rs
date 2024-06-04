@@ -6,14 +6,14 @@ fn main() {
     dbg!(output);
 }
 
-fn process(input: &str) -> i32 {
+pub fn process(input: &str) -> i32 {
     let (pipe_map, mut maze_pos) = parse_maze(input);
-    print!("START: {:?} - ", maze_pos.start);
+    // print!("START: {:?} - ", maze_pos.start);
     check_borders_from_start(&mut maze_pos, &pipe_map);
-    println!("{:?}", maze_pos.dir);
+    // println!("{:?}", maze_pos.dir);
     loop {
         check_borders(&mut maze_pos, &pipe_map);
-        println!("{:?}", maze_pos.curr);
+        // println!("{:?}", maze_pos.curr);
         if maze_pos.curr == maze_pos.start {
             break
         }
@@ -30,7 +30,7 @@ fn parse_maze(input: &str) -> (HashMap<(i32, i32), String>, Position) {
             let (x, y) = (x as i32, y as i32);
             pipe_map.insert((x, y), c.to_string());
             if c == 'S' {
-                println!("FOUND START: ({}{})", x, y);
+                // println!("FOUND START: ({}{})", x, y);
                 maze_pos.set_start(x, y);
             }
         }
@@ -51,7 +51,7 @@ fn check_borders(pos: &mut Position, pipes: &HashMap<(i32, i32), String>) {
     pos.set_curr(next_pos.0, next_pos.1);
 
     let next_pipe = pipes.get(&(next_pos.0, next_pos.1)).unwrap();
-    println!("Next: pos({},{}), pipe {} going {:?}", next_pos.0, next_pos.1, next_pipe, pos.dir);
+    // println!("Next: pos({},{}), pipe {} going {:?}", next_pos.0, next_pos.1, next_pipe, pos.dir);
     
     if next_pipe.as_str() == "S" {
         return
