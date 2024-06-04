@@ -6,11 +6,11 @@ fn main() {
     dbg!(output);
 }
 
-fn process(input: &str, cycle_cnt: usize) -> usize {
+pub fn process(input: &str, cycle_cnt: usize) -> usize {
     let mut rocks = parse(input);
     rocks.cycle_rocks(cycle_cnt);
     let result = rocks.calculate_load(Direction::North);
-    println!("RESULT {result}");
+    // println!("RESULT {result}");
     return result;
 }
 

@@ -4,7 +4,7 @@ fn main() {
     dbg!(output);
 }
 
-fn process(input: &str) -> usize {
+pub fn process(input: &str) -> usize {
     let mut rows: Vec<String> = vec![];
     let mut cols: Vec<Vec<char>> = vec![];
     let mut new_puzzle: bool = true;
@@ -22,7 +22,7 @@ fn process(input: &str) -> usize {
     let rocks = RockPlatform::new(rows, cols.clone());
 
     let result = rocks.calculate_load(Direction::North);
-    println!("RESULT {result}");
+    // println!("RESULT {result}");
     return result;
 }
 
@@ -101,9 +101,9 @@ impl RockPlatform {
 
 enum Direction {
     North,
-    // South,
-    // East,
-    // West,
+    South,
+    East,
+    West,
 }
 
 #[cfg(test)]
