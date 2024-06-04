@@ -4,16 +4,16 @@ fn main() {
     dbg!(output);
 }
 
-fn process(input: &str) -> i64 {
+pub fn process(input: &str) -> i64 {
     let mut lines = input.lines();
 
     let time: Vec<&str> = lines.nth(0).unwrap().split(":").collect();
     let time: i64 = time[1].replace(" ", "").parse().unwrap();
-    println!("{:?}", time);
+    // println!("{:?}", time);
 
     let distance: Vec<&str> = lines.nth(0).unwrap().split(":").collect();
     let distance: i64 = distance[1].replace(" ", "").parse().unwrap();
-    println!("{:?}", distance);
+    // println!("{:?}", distance);
 
     let mut win_count: i64 = 0;
     for t in 0..time {

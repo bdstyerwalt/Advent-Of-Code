@@ -1,14 +1,12 @@
-use std::{fs, error::Error, collections::HashSet};
+use std::{fs, collections::HashSet};
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let input_file: String = fs::read_to_string("input.txt")?;
+pub fn run() {
+    let input_file: String = fs::read_to_string("src\\day_03\\input.txt").expect("File not found!");
 
-    println!("\n\n---------Day 3---------");
+    println!("\n--Day 03------");
     println!("Part 1: {}", &part1(&input_file));
     println!("Part 2: {}", &part2(&input_file));
-    println!("----------------------");
-    
-    return Ok(())
+    println!("--------------");
 }
 
 fn part1(input_file: &String) -> i32 {
@@ -90,7 +88,6 @@ fn find_numbers(input_file: &String) -> Vec<(i32, i32, i32, i32)> {
 /* ---------------------------------------------------------------- */
 
 fn part2(input_file: &String) -> i32 { 
-    println!("-----------------");
     let gear_locs: HashSet<(i32, i32)> = find_gears(input_file);
     let number_locs: Vec<(i32, i32, i32, i32)> = find_numbers(input_file);
 
@@ -110,12 +107,12 @@ fn part2(input_file: &String) -> i32 {
             }
         
             if border_points.contains(&(gear_row, gear_col)) {
-                println!("* at ({},{}) touches {}", gear_row, gear_col, val);
+                // println!("* at ({},{}) touches {}", gear_row, gear_col, val);
                 touching += 1;
                 gear_ratio *= val;
             }
             if touching == 2 {
-                println!("Gear ratio is -> {}", gear_ratio);
+                // println!("Gear ratio is -> {}", gear_ratio);
                 acc += gear_ratio;
                 break;
             }

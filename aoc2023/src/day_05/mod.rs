@@ -1,17 +1,12 @@
-use std::{fs, error::Error, collections::HashMap, str::Lines, ops::Range, vec};
+use std::{fs, collections::HashMap, str::Lines, ops::Range, vec};
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let input_file: String = fs::read_to_string("input.txt")?;
+pub fn run() {
+    let input_file: String = fs::read_to_string("src\\day_05\\input.txt").expect("File not found!");
 
-    println!("\n\n---------Day 5---------");
-    let p1_res: u64 = part1(&input_file);
-    println!("Part 1: {}", p1_res);
-    println!("-----------------------");
-    let p2_res: u64 = part2(&input_file);
-    println!("Part 2: {}", p2_res);
-    println!("-----------------------");
-    
-    return Ok(())
+    println!("\n--Day 05------");
+    println!("Part 1: {}", &part1(&input_file));
+    println!("Part 2: {}", &part2(&input_file));
+    println!("--------------");
 }
 
 fn part1(input_lines: &String) -> u64 {
@@ -42,7 +37,7 @@ fn part2(input_lines: &String) -> u64 {
     
     let mut locations: Vec<u64> = vec![];
     for seed_range in seeds.chunks(2) {
-        println!("{}->{}", seed_range[0], seed_range[0]+seed_range[1]);
+        // println!("{}->{}", seed_range[0], seed_range[0]+seed_range[1]);
         for mut seed in seed_range[0]..seed_range[0]+seed_range[1] {
             //print!("\nSeed {} | ", seed);
             for map in &seed_to_loc_maps {
@@ -56,7 +51,7 @@ fn part2(input_lines: &String) -> u64 {
             locations.push(seed)
         }
     }
-    println!("{:?}", locations);
+    // println!("{:?}", locations);
     return *locations.iter().min().unwrap();
 }
 
@@ -105,7 +100,7 @@ fn process(lines: Lines, seed_map: HashMap<u64, u64>) -> u64 {
     let mut tmp_map: HashMap<(u64, u64), (u64, u64)> = HashMap::new();
     for line in lines {
         if line.contains("map:") {
-            println!("{}", line);
+            // println!("{}", line);
             building = true;
             continue;
         }
@@ -136,7 +131,7 @@ fn build_part2_maps(lines: Lines) -> Vec<Vec<(Range<u64>, Range<u64>)>> {
 
     for line in lines {
         if line.contains("map:") {
-            println!("{}", line);
+            // println!("{}", line);
             building = true;
             continue;
         }

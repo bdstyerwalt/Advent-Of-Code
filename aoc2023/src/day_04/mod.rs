@@ -1,42 +1,14 @@
-use std::{fs, error::Error, collections::{HashSet, HashMap}};
+use std::{fs, collections::{HashSet, HashMap}};
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let input_file: String = fs::read_to_string("input.txt")?;
+pub fn run() {
+    let input_file: String = fs::read_to_string("src\\day_04\\input.txt").expect("File not found!");
 
     let (p1_res, game_cards) = part1(&input_file);
-
-    println!("\n\n---------Day 4---------");
+    
+    println!("\n--Day 04------");
     println!("Part 1: {}", p1_res);
-    println!("Part 2: {}", part2(game_cards));
-    println!("----------------------");
-    
-    return Ok(())
-}
-
-fn part2(game_map: HashMap<i32, i32>) -> i32 {
-    let mut game_vec: Vec<i32> = vec![];
-    for (id, _score) in &game_map {
-        game_vec.push(*id);
-    }
-    
-    let mut total_cards: i32 = 0;
-    while game_vec.len() > 0 {
-        total_cards += 1;
-        let id = game_vec.pop().unwrap();
-        let (_id, score) = game_map.get_key_value(&id).unwrap();
-        //println!("Game {} had {} winners", id, score);
-        if *score > 0 {
-            //print!(" -> Adding games: ");
-            for cnt in 1..=*score {
-                let id = id + cnt;
-                //print!("{id}");
-                game_vec.push(id);
-            }
-            //println!("")
-        }
-    }
-
-    return total_cards;
+    println!("Part 2: {}", &part2(game_cards));
+    println!("--------------");
 }
 
 fn part1(input_file: &String) -> (i32, HashMap<i32, i32>) {
@@ -76,6 +48,32 @@ fn part1(input_file: &String) -> (i32, HashMap<i32, i32>) {
     }
     //println!("{:?}", game_map);
     return (total_score, game_map);
+}
+
+fn part2(game_map: HashMap<i32, i32>) -> i32 {
+    let mut game_vec: Vec<i32> = vec![];
+    for (id, _score) in &game_map {
+        game_vec.push(*id);
+    }
+    
+    let mut total_cards: i32 = 0;
+    while game_vec.len() > 0 {
+        total_cards += 1;
+        let id = game_vec.pop().unwrap();
+        let (_id, score) = game_map.get_key_value(&id).unwrap();
+        //println!("Game {} had {} winners", id, score);
+        if *score > 0 {
+            //print!(" -> Adding games: ");
+            for cnt in 1..=*score {
+                let id = id + cnt;
+                //print!("{id}");
+                game_vec.push(id);
+            }
+            //println!("")
+        }
+    }
+
+    return total_cards;
 }
 
 fn find_numbers(nums: Vec<&str>) -> HashSet<i32> {
