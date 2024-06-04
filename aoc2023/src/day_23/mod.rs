@@ -3,21 +3,17 @@ use Trail::*;
 
 use std::fs;
 
-fn main() {
-	let input = include_str!("input.txt");
-	let p1 = part1(input);
-	let p2 = part2(input);
-	println!("Part 2: {p2} in [{}s]", now.elapsed().as_secs());
-}
-
 pub fn run() {
-    let input_file: String = fs::read_to_string("src\\day_23\\input.txt").expect("File not found!");
-
-	let now = Instant::now();
+    let input_file = fs::read_to_string("src\\day_23\\input.txt").expect("File not found!");
 
     println!("\n--Day 23------");
-    println!("Part 1: {} in [{}ms]", &part1(&input_file), now.elapsed().as_millis());
-    println!("Part 2: {} in [{}ms]", &part2(&input_file), now.elapsed().as_millis());
+    let now = Instant::now();	
+	let p1 = part1(&input_file);
+	println!("Part 1: {p1} in [{}s]", now.elapsed().as_secs());
+    
+	let now = Instant::now();
+	let p2 = part2(&input_file);
+	println!("Part 2: {p2} in [{}s]", now.elapsed().as_secs());
     println!("--------------");
 }
 
