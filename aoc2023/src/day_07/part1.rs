@@ -78,12 +78,12 @@ impl Hand {
     }
 }
 
-fn process(input: &str) -> i32 {
+pub fn process(input: &str) -> i32 {
     let mut all_hands: Vec<Hand> = vec![];
     for line in input.lines() {
         let line: Vec<&str> = line.split_whitespace().collect();
         let hand: Hand = Hand::new(line[0].to_string(), line[1].parse().unwrap());
-        println!("{:?}", hand);
+        // println!("{:?}", hand);
         all_hands.push(hand);
     }
     
