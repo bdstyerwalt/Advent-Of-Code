@@ -5,13 +5,13 @@ fn main() {
     dbg!(output);
 }
 
-fn process(input: &str) -> u32 {
+pub fn process(input: &str) -> u32 {
     let (springs, groups) = parse_spring_groups(&input);
 
     let result: u32 = springs.iter().enumerate().zip(groups).map(|((i, sp), gr)| {
-        print!("{i} -> ");
+        // print!("{i} -> ");
         let res = evaluate_row(sp, gr);
-        println!("RESULT: {res}");
+        // println!("RESULT: {res}");
         return res;
     }).sum();
     
@@ -36,7 +36,7 @@ fn parse_spring_groups(input: &str) -> (Vec<SpringGrouping>, Vec<Vec<u32>>) {
     let mut springs: Vec<SpringGrouping> = vec![];
     let mut groups: Vec<Vec<u32>> = vec![];
     for (i, line) in input.lines().enumerate() {
-        println!("{} out of 1000", i+1);
+        // println!("{} out of 1000", i+1);
         let mut data = line.split_whitespace();
         springs.push(SpringGrouping::new(data.nth(0).unwrap()));
         groups.push(data.nth(0).unwrap().split(",").map(|x| x.trim().parse().unwrap()).collect());

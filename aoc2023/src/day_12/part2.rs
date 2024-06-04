@@ -7,14 +7,14 @@ fn main() {
     dbg!(output);
 }
 
-fn process(input: &str) -> usize {
+pub fn process(input: &str) -> usize {
     let puzzles = parse_spring_groups(&input);
 
     let mut memo: HashMap<(&[char], &[usize]), usize> = HashMap::new();
     let result: usize = puzzles.iter().enumerate().map(|(i, puz)| {
-        print!("{i} -> ");
+        // print!("{i} -> ");
         let res = SpringGrouping::check_score(&puz.pattern, &puz.numbers, &mut memo);
-        println!("RESULT: {res}");
+        // println!("RESULT: {}", res);
         return res;
     }).sum();
     
