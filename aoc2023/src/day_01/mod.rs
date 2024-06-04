@@ -5,13 +5,13 @@
     to form a single two-digit number.
 */
 
-use std::{fs, error::Error, collections::HashMap};
+use std::{fs, collections::HashMap};
 use regex::Regex;
 
 pub fn run() {
     let input_file: String = fs::read_to_string("src\\day_01\\input.txt").expect("File not found!");
 
-    println!("\n\n--Day 01------");
+    println!("\n--Day 01------");
     println!("Part 1: {}", &part1(&input_file));
     println!("Part 2: {}", &part2(&input_file));
     println!("--------------");
