@@ -38,7 +38,7 @@ fn print_answser(puzzle: &mut Puzzle) {
     }
 }
 
-fn process(input: &str) -> usize {
+pub fn process(input: &str) -> usize {
     let mut puzzle: Puzzle = parse(input);
     for row in 0..puzzle.height {
         for col in 0..puzzle.width {
@@ -59,7 +59,7 @@ fn process(input: &str) -> usize {
             }
         }
     }
-    print_answser(&mut puzzle);
+    // print_answser(&mut puzzle);
     return puzzle.max_energized;
 }
 

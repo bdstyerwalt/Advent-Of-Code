@@ -8,7 +8,7 @@ fn main() {
     dbg!(output);
 }
 
-fn process(input: &str) -> usize {
+pub fn process(input: &str) -> usize {
     let mut width: usize = 0;
     let lines = input.lines();
     let height: usize = lines.clone().count();
@@ -28,7 +28,7 @@ fn process(input: &str) -> usize {
         Some(mirror) => {
             let temp_dirs = eval_mirror(mirror.clone(), &East);
             for dir in temp_dirs {
-                println!("NEW STARTING DIR {:?}", dir);
+                // println!("NEW STARTING DIR {:?}", dir);
                 new_dirs.push((0, 0, dir));
             }
         }
@@ -64,15 +64,15 @@ fn process(input: &str) -> usize {
     for row in 0..puzzle.height {
         for col in 0..puzzle.width {
             if puzzle.visited_set.contains(&(row, col)) {
-                print!("#");
+                // print!("#");
             } else {
-                print!(".");
+                // print!(".");
             }
         }
-        println!();
+        // println!();
     }
-    dbg!(puzzle.width);
-    dbg!(puzzle.height);
+    // dbg!(puzzle.width);
+    // dbg!(puzzle.height);
     return puzzle.visited_set.iter().count();
 }
 
