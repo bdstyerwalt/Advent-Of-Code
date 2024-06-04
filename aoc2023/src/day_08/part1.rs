@@ -6,10 +6,10 @@ fn main() {
     dbg!(output);
 }
 
-fn process(input: &str) -> i32 {
+pub fn process(input: &str) -> i32 {
     let mut lines = input.lines();
     let instructions: Vec<String> = lines.next().unwrap().chars().map(|c| c.to_string()).collect();
-    println!("{:?}", instructions);
+    // println!("{:?}", instructions);
     
     lines.next(); // skip empty line
     let mut mappings: HashMap<String, (String, String)> = HashMap::new();
@@ -27,7 +27,7 @@ fn process(input: &str) -> i32 {
     let mut step_count: i32 = 0;
     let mut curr_step: String = "AAA".to_string();
     let mut instructions = instructions.iter().cycle();
-    print!("Starting at: {curr_step}");
+    // print!("Starting at: {curr_step}");
     while curr_step != "ZZZ" {
         let step = instructions.next().unwrap();
         let (_k, v) = mappings.get_key_value(&curr_step).unwrap();
@@ -36,10 +36,10 @@ fn process(input: &str) -> i32 {
         } else /* L */{
             curr_step = v.0.to_string();
         }
-        print!(" -> {curr_step}");
+        // print!(" -> {curr_step}");
         step_count += 1;
     }
-    println!("\n");
+    // println!("\n");
     return step_count;
 }
 

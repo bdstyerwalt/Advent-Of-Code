@@ -6,7 +6,7 @@ fn main() {
     dbg!(output);
 }
 
-fn process(input: &str) -> i64 {
+pub fn process(input: &str) -> i64 {
     let mut lines = input.lines();
     let instructions: Vec<String> = lines.next().unwrap().chars().map(|c| c.to_string()).collect();
     
@@ -18,7 +18,7 @@ fn process(input: &str) -> i64 {
         let vals: Vec<&str> = line.split(" = ").collect();
         let key: &str = vals[0];
         if key.ends_with("A") {
-            println!("New Starting Location: {}", key);
+            // println!("New Starting Location: {}", key);
             starting_locs.push(key.to_string())
         }
 
@@ -52,7 +52,7 @@ fn process(input: &str) -> i64 {
         solve_values.push(step_count);
         //println!("\n");
     }
-    println!("{:?}", solve_values);
+    // println!("{:?}", solve_values);
     return lcm(&solve_values);
 }
 
