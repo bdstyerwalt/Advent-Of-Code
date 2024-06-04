@@ -5,10 +5,10 @@ fn main() {
     dbg!(output);
 }
 
-fn process(input: &str) -> u32 {
+pub fn process(input: &str) -> u32 {
     let steps = parse(input);
     return steps.iter().map(|s| {
-        println!("{s}");
+        // println!("{s}");
         hash_step(s)
     }).sum::<u32>();
 }

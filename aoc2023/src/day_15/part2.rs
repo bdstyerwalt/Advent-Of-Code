@@ -7,7 +7,7 @@ fn main() {
     dbg!(output);
 }
 
-fn process(input: &str) -> u32 {
+pub fn process(input: &str) -> u32 {
     let lenses = parse(input);
     let mut boxes: HashMap<u32, Vec<(&str, u32)>> = HashMap::new();
     for lens in lenses {
@@ -52,7 +52,7 @@ fn process(input: &str) -> u32 {
     return boxes.iter().map(|(box_num, box_vec)| {
       box_vec.iter().enumerate().map(|(i, (lens, focal))| {
         let res = (box_num + 1) * (i as u32 + 1) * focal;
-        println!("(box {box_num} * {} (slot [{lens}]) * {focal} (focal length) = {res}", i+1);
+        // println!("(box {box_num} * {} (slot [{lens}]) * {focal} (focal length) = {res}", i+1);
         return res;
       }).sum::<u32>()
     }).sum();
