@@ -4,7 +4,7 @@ fn main() {
     dbg!(output);
 }
 
-fn process(input: &str) -> i32 {
+pub fn process(input: &str) -> i32 {
     let mut result: i32 = 0;
 
     for line in input.lines() {
