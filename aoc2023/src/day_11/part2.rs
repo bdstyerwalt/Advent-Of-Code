@@ -6,14 +6,14 @@ fn main() {
     dbg!(output);
 }
 
-fn process(universe: &str, scale: i64) -> i64 {
+pub fn process(universe: &str, scale: i64) -> i64 {
     let expanse = expand_universe(universe);
     let galaxy_map = find_galaxies(universe);
     return calc_shortest_path(galaxy_map, expanse, scale);
 }
 
 fn expand_universe(universe: &str) -> (Vec<i64>, Vec<i64>) {
-    println!("Expanding Universe Map...");
+    // println!("Expanding Universe Map...");
     // Check rows and columns for expansion.
     let mut expanded_col_check = vec![];
     let mut expanded_rows: Vec<i64> = vec![];
@@ -73,13 +73,13 @@ fn expand_universe(universe: &str) -> (Vec<i64>, Vec<i64>) {
 }
 
 fn find_galaxies(universe: &str) -> HashMap<i64, (i64, i64)> {
-    println!("Finding galaxy coordinates...");
+    // println!("Finding galaxy coordinates...");
     let mut galaxy_map: HashMap<i64, (i64, i64)> = HashMap::new();
     let mut galaxy_count = 1;
     for (row, line) in universe.lines().enumerate() {
         for (col, c) in line.chars().enumerate() {
             if c == '#' {
-                println!("Found Galaxy {galaxy_count} at ({},{})", col, row);
+                // println!("Found Galaxy {galaxy_count} at ({},{})", col, row);
                 galaxy_map.insert(galaxy_count, (col as i64, row as i64));
                 galaxy_count += 1;
             }
@@ -89,17 +89,17 @@ fn find_galaxies(universe: &str) -> HashMap<i64, (i64, i64)> {
 }
 
 fn calc_shortest_path(galaxy_map: HashMap<i64, (i64, i64)>, expanse: (Vec<i64>, Vec<i64>), scale: i64) -> i64 {
-    println!("Calculation the shortest paths...");
+    // print!("Calculation the shortest paths...");
     let exp_rows = expanse.0;
     let exp_cols = expanse.1;
     let scale = scale - 1;
 
-    println!("{:?}", exp_rows);
-    println!("{:?}", exp_cols);
+    // print!("{:?}", exp_rows);
+    // print!("{:?}", exp_cols);
 
     let mut shortest_paths: Vec<i64> = vec![];
     for (g1, loc1) in &galaxy_map {
-        println!("{g1}/{}", galaxy_map.len()+1);
+        // print!("{g1}/{}", galaxy_map.len()+1);
         for (g2, loc2) in &galaxy_map {
             if g2 <= g1 {
                 continue;
@@ -126,7 +126,7 @@ fn calc_shortest_path(galaxy_map: HashMap<i64, (i64, i64)>, expanse: (Vec<i64>, 
             shortest_paths.push(dist)
         }
     }
-    println!("count of pairs {}", shortest_paths.len());
+    // print!("count of pairs {}", shortest_paths.len());
     return shortest_paths.iter().sum();
 }
 

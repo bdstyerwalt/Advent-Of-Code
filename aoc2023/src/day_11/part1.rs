@@ -6,7 +6,7 @@ fn main() {
     dbg!(output);
 }
 
-fn process(input: &str) -> i32 {
+pub fn process(input: &str) -> i32 {
     let universe = expand_universe(input);
     let galaxy_map = find_galaxies(universe);
     return calc_shortest_path(galaxy_map);
