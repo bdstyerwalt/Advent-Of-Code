@@ -4,7 +4,7 @@ fn main() {
     dbg!(output);
 }
 
-fn process(input: &str) -> u32 {
+pub fn process(input: &str) -> u32 {
     let mut puzzles: Vec<Puzzle> = vec![];
     let mut rows: Vec<String> = vec![];
     let mut cols: Vec<Vec<char>> = vec![];
@@ -32,13 +32,13 @@ fn process(input: &str) -> u32 {
     
     let mut result: u32 = 0;
     for (i, puzzle) in puzzles.iter().enumerate() {
-        print!("Solving puzzle {}! -> ", i+1);
+        // print!("Solving puzzle {}! -> ", i+1);
         let mut intermediate = 0;
         intermediate += check_horizontal(&puzzle);
         intermediate += check_vertical(&puzzle);
-        println!("{intermediate}");
+        // println!("{intermediate}");
         result += intermediate;
-        println!("Result: {:?}\n", result);
+        // println!("Result: {:?}\n", result);
     }
     return result;
 }
@@ -112,10 +112,20 @@ fn check_from_middle(rows: &Vec<String>, stop: usize) -> u32 {
     let mut bot = mid;
 
     let mut is_mirror = true;
-    for _i in 0..mid {   
-        if rows[top] != rows[bot] {
-            is_mirror = false;
-            break;
+    let mut diffs = 0;
+    for _i in 0..mid {
+        let left = &rows[top];
+        let right = &rows[bot];
+        if left != right {
+            for (c1, c2) in left.chars().zip(right.chars()) {
+                if c1 != c2 {
+                    diffs += 1;
+                }
+            }
+            if diffs > 1 {
+                is_mirror = false;
+                break;
+            }
         }
 
         if top == 0 {
@@ -126,7 +136,9 @@ fn check_from_middle(rows: &Vec<String>, stop: usize) -> u32 {
     }
     
     let mut result: u32 = 0;
-    if is_mirror {
+    if is_mirror && diffs > 0 {
+        // dbg!(rows);
+        // print!("diffs {diffs} -> ");
         result = mid as u32;
     }
     return result;
@@ -164,7 +176,7 @@ mod tests {
     #[test]
     fn test_sample() {
         let input = include_str!("sample.txt");
-        assert_eq!(405, process(input));
+        assert_eq!(400, process(input));
     }
 
     #[test]
