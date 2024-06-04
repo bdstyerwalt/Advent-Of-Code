@@ -8,15 +8,13 @@
 use std::{fs, error::Error, collections::HashMap};
 use regex::Regex;
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let input_file: String = fs::read_to_string("input.txt")?;
+pub fn run() {
+    let input_file: String = fs::read_to_string("src\\day_01\\input.txt").expect("File not found!");
 
-    println!("\n\n--------------");
+    println!("\n\n--Day 01------");
     println!("Part 1: {}", &part1(&input_file));
     println!("Part 2: {}", &part2(&input_file));
     println!("--------------");
-    
-    return Ok(())
 }
 
 
