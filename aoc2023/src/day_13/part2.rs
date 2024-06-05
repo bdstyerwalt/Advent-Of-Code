@@ -1,9 +1,3 @@
-fn main() {
-    let input = include_str!("input.txt");
-    let output = process(input);
-    dbg!(output);
-}
-
 pub fn process(input: &str) -> u32 {
     let mut puzzles: Vec<Puzzle> = vec![];
     let mut rows: Vec<String> = vec![];
@@ -31,7 +25,7 @@ pub fn process(input: &str) -> u32 {
     puzzles.push(Puzzle::new(rows.clone(), cols.clone()));
     
     let mut result: u32 = 0;
-    for (i, puzzle) in puzzles.iter().enumerate() {
+    for (_i, puzzle) in puzzles.iter().enumerate() {
         // print!("Solving puzzle {}! -> ", i+1);
         let mut intermediate = 0;
         intermediate += check_horizontal(&puzzle);
@@ -173,27 +167,29 @@ impl Puzzle {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs;
+
     #[test]
     fn test_sample() {
-        let input = include_str!("sample.txt");
-        assert_eq!(400, process(input));
+        let input = fs::read_to_string("src\\day_13\\sample.txt").expect("Couldn't read file");
+        assert_eq!(400, process(&input));
     }
 
     #[test]
     fn test_puzzle1() {
-        let input = include_str!("puzzle1.txt");
-        assert_eq!(5, process(input));
+        let input = fs::read_to_string("src\\day_13\\puzzle1.txt").expect("Couldn't read file");
+        assert_eq!(5, process(&input));
     }
 
     #[test]
     fn test_puzzle2() {
-        let input = include_str!("puzzle2.txt");
-        assert_eq!(1, process(input));
+        let input = fs::read_to_string("src\\day_13\\puzzle2.txt").expect("Couldn't read file");
+        assert_eq!(1, process(&input));
     }
 
     #[test]
     fn test_puzzle3() {
-        let input = include_str!("puzzle3.txt");
-        assert_eq!(1100, process(input));
+        let input = fs::read_to_string("src\\day_13\\puzzle3.txt").expect("Couldn't read file");
+        assert_eq!(1100, process(&input));
     }
 }

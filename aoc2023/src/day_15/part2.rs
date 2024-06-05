@@ -1,12 +1,5 @@
 use std::collections::HashMap;
 
-
-fn main() {
-    let input = include_str!("input.txt");
-    let output = process(input);
-    dbg!(output);
-}
-
 pub fn process(input: &str) -> u32 {
     let lenses = parse(input);
     let mut boxes: HashMap<u32, Vec<(&str, u32)>> = HashMap::new();
@@ -50,7 +43,7 @@ pub fn process(input: &str) -> u32 {
         }
     }
     return boxes.iter().map(|(box_num, box_vec)| {
-      box_vec.iter().enumerate().map(|(i, (lens, focal))| {
+      box_vec.iter().enumerate().map(|(i, (_lens, focal))| {
         let res = (box_num + 1) * (i as u32 + 1) * focal;
         // println!("(box {box_num} * {} (slot [{lens}]) * {focal} (focal length) = {res}", i+1);
         return res;

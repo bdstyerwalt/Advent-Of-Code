@@ -1,9 +1,3 @@
-fn main() {
-    let input = include_str!("input.txt");
-    let output = process(input);
-    dbg!(output);
-}
-
 pub fn process(input: &str) -> i32 {
     let mut result: i32 = 0;
 

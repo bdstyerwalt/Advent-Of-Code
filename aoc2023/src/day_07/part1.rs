@@ -1,12 +1,5 @@
 use core::panic;
 
-fn main() {
-    let input = include_str!("input.txt");
-    let output = process(input);
-    dbg!(output);
-}
-
-
 #[derive(Debug, PartialEq, PartialOrd)]
 struct Hand {
     strength: i32,
@@ -114,9 +107,8 @@ fn check_high_card(h1: &Hand, h2: &Hand) -> bool{
 
 #[cfg(test)]
 mod tests {
-    use std::vec;
+    use super::*;
 
-    use crate::{process, Hand};
 
     #[test]
     fn part1_sample() {

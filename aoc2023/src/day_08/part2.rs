@@ -1,11 +1,5 @@
 use std::collections::HashMap;
 
-fn main() {
-    let input = include_str!("input.txt");
-    let output = process(input);
-    dbg!(output);
-}
-
 pub fn process(input: &str) -> i64 {
     let mut lines = input.lines();
     let instructions: Vec<String> = lines.next().unwrap().chars().map(|c| c.to_string()).collect();

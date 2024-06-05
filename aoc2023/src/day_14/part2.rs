@@ -1,11 +1,5 @@
 use std::collections::HashMap;
 
-fn main() {
-    let input = include_str!("input.txt");
-    let output = process(input, 1000000000);
-    dbg!(output);
-}
-
 pub fn process(input: &str, cycle_cnt: usize) -> usize {
     let mut rocks = parse(input);
     rocks.cycle_rocks(cycle_cnt);

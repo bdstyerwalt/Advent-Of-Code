@@ -1,17 +1,10 @@
 use std::collections::HashMap;
 
-
-fn main() {
-    let input = include_str!("input.txt");
-    let output = process(input);
-    dbg!(output);
-}
-
 pub fn process(input: &str) -> usize {
     let puzzles = parse_spring_groups(&input);
 
     let mut memo: HashMap<(&[char], &[usize]), usize> = HashMap::new();
-    let result: usize = puzzles.iter().enumerate().map(|(i, puz)| {
+    let result: usize = puzzles.iter().enumerate().map(|(_i, puz)| {
         // print!("{i} -> ");
         let res = SpringGrouping::check_score(&puz.pattern, &puz.numbers, &mut memo);
         // println!("RESULT: {}", res);
@@ -24,7 +17,7 @@ pub fn process(input: &str) -> usize {
 fn parse_spring_groups(input: &str) -> Vec<SpringGrouping> {
     let mut puzzles: Vec<SpringGrouping> = vec![];
 
-    let _line_cnt = input.clone().lines().count();
+    let _line_cnt = input.lines().count();
     for (_i, line) in input.lines().enumerate() {
         // println!("{} out of {}", i+1, line_cnt);
         let (springs, numbers) = line.split_once(" ").unwrap();

@@ -34,7 +34,7 @@ fn parse<'a>(input: &'a str) -> Graph<'a> {
 
 fn part1(input: &str) -> usize {
     let graph = parse(input);
-	let (cut, partition) = stoer_wagner(&graph);
+	let (_cut, partition) = stoer_wagner(&graph);
 	// dbg!(cut);
 	return partition.len() * (graph.verticies.len() - partition.len());
 }

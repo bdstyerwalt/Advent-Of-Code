@@ -160,30 +160,29 @@ fn build_part2_maps(lines: Lines) -> Vec<Vec<(Range<u64>, Range<u64>)>> {
 
 #[cfg(test)]
 mod tests {
-    use crate::part1;
-    use crate::part2;
+    use super::*;
 
     #[test]
     fn part1_sample() {
-        let input_file: String = fs::read_to_string("sample.txt").expect("Couldn't read file");
+        let input_file: String = fs::read_to_string("src\\day_05\\sample.txt").expect("Couldn't read file");
         assert_eq!(35, part1(&input_file));
     }
 
     #[test]
     fn part2_sample() {
-        let input_file: String = fs::read_to_string("sample.txt").expect("Couldn't read file");
+        let input_file: String = fs::read_to_string("src\\day_05\\sample.txt").expect("Couldn't read file");
         assert_eq!(46, part2(&input_file));
     }
 
     #[test]
     fn part1_input() {
-        let input_file: String = fs::read_to_string("input.txt").expect("Couldn't read file");
+        let input_file: String = fs::read_to_string("src\\day_05\\input.txt").expect("Couldn't read file");
         assert_eq!(486613012, part1(&input_file));
     }
 
     #[test]
     fn part2_input() {
-        let input_file: String = fs::read_to_string("input.txt").expect("Couldn't read file");
+        let input_file: String = fs::read_to_string("src\\day_05\\input.txt").expect("Couldn't read file");
         assert_eq!(56931769, part2(&input_file));
     }
 }

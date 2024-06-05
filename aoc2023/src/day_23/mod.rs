@@ -44,7 +44,7 @@ fn parse(input: &str) -> Puzzle {
 fn part1(input: &str) -> usize {
     let mut puzzle = parse(input);
     a_star_p1(&mut puzzle);
-	let (max_path, visited) = puzzle.paths.iter().max_by_key(|(&key, _val)| key).unwrap();
+	let (max_path, _visited) = puzzle.paths.iter().max_by_key(|(&key, _val)| key).unwrap();
 	// puzzle.print_hiking_map(visited);
 	return *max_path;
 }
@@ -205,31 +205,31 @@ impl Puzzle {
 		return filt.into_keys().max().expect("Should Exist");
 	}
 
-	fn print_hiking_map(&self, visited: &HashSet<Pos>) {
-		for row in 0..self.max_row {
-			for col in 0..self.max_col {
-				let pos = Pos { row, col };
-				if visited.contains(&pos) {
-					print!("O")
-				} else {
-					let trail = self.hiking_map.get(&pos).expect("Should exist.");
-					match trail {
-						Path => print!("."),
-						Forest => print!("#"),
-						Slope(dir) => {
-							match dir {
-								Direction::North => print!("^"),
-								Direction::South => print!("v"),
-								Direction::East => print!(">"),
-								Direction::West => print!("<"),
-							}
-						},
-					}
-				}
-			}
-			println!();
-		}
-	}
+	// fn print_hiking_map(&self, visited: &HashSet<Pos>) {
+	// 	for row in 0..self.max_row {
+	// 		for col in 0..self.max_col {
+	// 			let pos = Pos { row, col };
+	// 			if visited.contains(&pos) {
+	// 				print!("O")
+	// 			} else {
+	// 				let trail = self.hiking_map.get(&pos).expect("Should exist.");
+	// 				match trail {
+	// 					Path => print!("."),
+	// 					Forest => print!("#"),
+	// 					Slope(dir) => {
+	// 						match dir {
+	// 							Direction::North => print!("^"),
+	// 							Direction::South => print!("v"),
+	// 							Direction::East => print!(">"),
+	// 							Direction::West => print!("<"),
+	// 						}
+	// 					},
+	// 				}
+	// 			}
+	// 		}
+	// 		println!();
+	// 	}
+	// }
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]

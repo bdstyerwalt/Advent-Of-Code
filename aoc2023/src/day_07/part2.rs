@@ -1,10 +1,3 @@
-fn main() {
-    let input = include_str!("input.txt");
-    let output = process(input);
-    dbg!(output);
-}
-
-
 #[derive(Debug, PartialEq, PartialOrd)]
 struct Hand {
     strength: i32,
@@ -117,8 +110,7 @@ pub fn process(input: &str) -> i32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::process;
-    use crate::Hand;
+    use super::*;
 
     #[test]
     fn part2_sample() {

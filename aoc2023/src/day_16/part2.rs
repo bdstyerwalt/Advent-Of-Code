@@ -2,12 +2,6 @@ use std::{collections::{HashMap, HashSet}, hash::{Hasher, Hash}};
 use Direction::{North, South, East, West};
 use Mirror::{Pipe, Dash, Forward, Backward};
 
-fn main() {
-    let input = include_str!("input.txt");
-    let output = process(input);
-    dbg!(output);
-}
-
 fn parse(input: &str) -> Puzzle {
     let mut width: usize = 0;
     let lines = input.lines();
@@ -22,21 +16,21 @@ fn parse(input: &str) -> Puzzle {
     return Puzzle::new(mirror_map, HashSet::new(), HashSet::new(), width, height);
 }
 
-fn print_answser(puzzle: &mut Puzzle) {
-    let (start_row, start_col, start_dir) = puzzle.best_pos;
-    println!("BEST START POS: row {}, col {}, dir {:?}", start_row, start_col, start_dir);
-    puzzle.evaluate(start_row, start_col, start_dir);
-    for row in 0..puzzle.height {
-        for col in 0..puzzle.width {
-            if puzzle.visited_set.contains(&(row, col)) {
-                print!("#");
-            } else {
-                print!(".");
-            }
-        }
-        println!();
-    }
-}
+// fn print_answser(puzzle: &mut Puzzle) {
+//     let (start_row, start_col, start_dir) = puzzle.best_pos;
+//     println!("BEST START POS: row {}, col {}, dir {:?}", start_row, start_col, start_dir);
+//     puzzle.evaluate(start_row, start_col, start_dir);
+//     for row in 0..puzzle.height {
+//         for col in 0..puzzle.width {
+//             if puzzle.visited_set.contains(&(row, col)) {
+//                 print!("#");
+//             } else {
+//                 print!(".");
+//             }
+//         }
+//         println!();
+//     }
+// }
 
 pub fn process(input: &str) -> usize {
     let mut puzzle: Puzzle = parse(input);

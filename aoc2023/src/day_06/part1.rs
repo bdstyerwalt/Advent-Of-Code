@@ -1,9 +1,3 @@
-fn main() {
-    let input = include_str!("input.txt");
-    let output = process(input);
-    dbg!(output);
-}
-
 pub fn process(input: &str) -> i32 {
     let mut lines = input.lines();
 
@@ -35,7 +29,7 @@ pub fn process(input: &str) -> i32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::process;
+    use super::*;
 
     #[test]
     fn part1_sample() {

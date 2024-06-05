@@ -1,11 +1,5 @@
 use std::collections::HashMap;
 
-fn main() {
-    let input = include_str!("input.txt");
-    let output = process(input, 1000000);
-    dbg!(output);
-}
-
 pub fn process(universe: &str, scale: i64) -> i64 {
     let expanse = expand_universe(universe);
     let galaxy_map = find_galaxies(universe);

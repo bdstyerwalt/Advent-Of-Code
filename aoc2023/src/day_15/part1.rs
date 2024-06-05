@@ -1,10 +1,3 @@
-
-fn main() {
-    let input = include_str!("input.txt");
-    let output = process(input);
-    dbg!(output);
-}
-
 pub fn process(input: &str) -> u32 {
     let steps = parse(input);
     return steps.iter().map(|s| {

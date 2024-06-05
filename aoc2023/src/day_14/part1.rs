@@ -1,9 +1,3 @@
-fn main() {
-    let input = include_str!("input.txt");
-    let output = process(input);
-    dbg!(output);
-}
-
 pub fn process(input: &str) -> usize {
     let mut rows: Vec<String> = vec![];
     let mut cols: Vec<Vec<char>> = vec![];

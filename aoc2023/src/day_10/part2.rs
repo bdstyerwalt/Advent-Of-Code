@@ -1,11 +1,5 @@
 use std::collections::HashMap;
 
-fn main() {
-    let input = include_str!("input.txt");
-    let output = process(input);
-    dbg!(output);
-}
-
 pub fn process(input: &str) -> i32 {
     let (pipe_map, mut maze_pos) = parse_maze(input);
     // println!("START: {:?} - ", maze_pos.start);

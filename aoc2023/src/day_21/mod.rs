@@ -16,7 +16,7 @@ fn parse(input: &str) -> Puzzle {
     let mut max_col = 0;
     let max_row = input.lines().count() - 1;
     let garden_map = input.lines().enumerate().flat_map(|(row, line)| {
-        let chs = line.clone().chars();
+        let chs = line.chars();
         if row == 0 { max_col = chs.count() - 1 }
         match line.chars().into_iter().position(|c| c == 'S') {
             Some(col) => starting_pos = Pos::new(row, col),

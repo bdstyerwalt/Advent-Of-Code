@@ -1,14 +1,7 @@
-
-fn main() {
-    let input = include_str!("input.txt");
-    let output = process(input);
-    dbg!(output);
-}
-
 pub fn process(input: &str) -> u32 {
     let (springs, groups) = parse_spring_groups(&input);
 
-    let result: u32 = springs.iter().enumerate().zip(groups).map(|((i, sp), gr)| {
+    let result: u32 = springs.iter().enumerate().zip(groups).map(|((_i, sp), gr)| {
         // print!("{i} -> ");
         let res = evaluate_row(sp, gr);
         // println!("RESULT: {res}");
@@ -35,7 +28,7 @@ fn evaluate_row(spring_combos: &SpringGrouping, numbers: Vec<u32>) -> u32 {
 fn parse_spring_groups(input: &str) -> (Vec<SpringGrouping>, Vec<Vec<u32>>) {
     let mut springs: Vec<SpringGrouping> = vec![];
     let mut groups: Vec<Vec<u32>> = vec![];
-    for (i, line) in input.lines().enumerate() {
+    for (_i, line) in input.lines().enumerate() {
         // println!("{} out of 1000", i+1);
         let mut data = line.split_whitespace();
         springs.push(SpringGrouping::new(data.nth(0).unwrap()));
