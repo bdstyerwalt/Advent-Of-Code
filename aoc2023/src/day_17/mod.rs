@@ -37,7 +37,7 @@ fn part2(input: &str) -> u32 {
 
 struct Puzzle {
     city_map: HashMap<(usize, usize), u32>,
-    start: (usize, usize),
+    // start: (usize, usize),
     goal: (usize, usize),
     min_heat_loss: u32,
 }
@@ -46,7 +46,7 @@ impl Puzzle {
     fn new(city_map: HashMap<(usize, usize), u32>, goal: (usize, usize)) -> Self {
         Self {
             city_map: city_map,
-            start: (0, 0),
+            // start: (0, 0),
             goal: goal,
             min_heat_loss: u32::MAX,
         }

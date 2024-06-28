@@ -13,7 +13,7 @@ pub fn process(input: &str) -> usize {
         }
         rows.push(line.to_string());
     }
-    let rocks = RockPlatform::new(rows, cols.clone());
+    let rocks = RockPlatform::new(cols.clone());
 
     let result = rocks.calculate_load(Direction::North);
     // println!("RESULT {result}");
@@ -21,14 +21,15 @@ pub fn process(input: &str) -> usize {
 }
 
 struct RockPlatform {
-    rows: Vec<String>,
+    // rows: Vec<String>,
     cols: Vec<String>,
 }
 
 impl RockPlatform {
-    fn new(rows: Vec<String>, cols: Vec<Vec<char>>) -> Self {
+    /* rows: Vec<String>, */
+    fn new(cols: Vec<Vec<char>>) -> Self {
         Self {
-            rows: rows,
+            // rows: rows,
             cols: RockPlatform::char_vecs_to_string_vecs(cols),
         }
     }
@@ -42,22 +43,22 @@ impl RockPlatform {
     }
 
     fn calculate_load(&self, dir: Direction) -> usize {
-        let mut eval_map: Vec<String>;
+        let eval_map: Vec<String>;
         match dir {
             Direction::North => {
                 eval_map = self.cols.clone();
             },
-            Direction::South => {
-                eval_map = self.cols.clone();
-                eval_map.reverse();
-            },
-            Direction::East => {
-                eval_map = self.rows.clone();
-            },
-            Direction::West => {
-                eval_map = self.rows.clone();
-                eval_map.reverse();
-            },
+            // Direction::South => {
+            //     eval_map = self.cols.clone();
+            //     eval_map.reverse();
+            // },
+            // Direction::East => {
+            //     eval_map = self.rows.clone();
+            // },
+            // Direction::West => {
+            //     eval_map = self.rows.clone();
+            //     eval_map.reverse();
+            // },
         }
         // dbg!(&eval_map);
 
@@ -95,9 +96,9 @@ impl RockPlatform {
 
 enum Direction {
     North,
-    South,
-    East,
-    West,
+    // South,
+    // East,
+    // West,
 }
 
 #[cfg(test)]

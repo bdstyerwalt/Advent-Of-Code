@@ -63,7 +63,7 @@ fn part2(input: &str) -> f64 {
     let x = b_matrix[0].round();
     let y = b_matrix[1].round();
     let vx = b_matrix[2].round();
-    let vy = b_matrix[3].round();
+    // let vy = b_matrix[3].round();
 
     // Get Z, VZ
     let mut a_matrix: Vec<Vec<f64>> = vec![vec![0f64; 2]; 2];
@@ -87,7 +87,7 @@ fn part2(input: &str) -> f64 {
     // dbg!(&b_matrix);
 
     let z = b_matrix[0].round();
-    let vz = b_matrix[1].round();
+    // let vz = b_matrix[1].round();
 
     // println!("Found Rock at ({x}, {y}, {z}) with vel ({vx}, {vy}, {vz})");
 
