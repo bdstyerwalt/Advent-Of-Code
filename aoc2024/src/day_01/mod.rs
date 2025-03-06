@@ -1,4 +1,5 @@
 use std::fs;
+use std::collections::HashMap;
 
 pub fn run() {
     let input_file: String = fs::read_to_string("src\\day_01\\input.txt").expect("File not found!");
@@ -40,8 +41,21 @@ fn part1(input_file: &str) -> i32 {
 }
 
 fn part2(input_file: &str) -> i32 {    
-    let _puzzle = parse(&input_file);
-    let p2 = 0;
+    let mut puzzle = parse(&input_file);
+    let mut id_map: HashMap<i32, i32> = HashMap::new();
+
+    let p2 = puzzle.list_a.iter().fold(0, |acc, a| {
+        match id_map.get(&a) {
+            Some(v) => acc + a*v,
+            None => {
+                let found: Vec<i32> = puzzle.list_b.extract_if(.., |b| b == a).collect();
+                let cnt = found.len() as i32;
+                id_map.insert(*a, cnt);
+                return acc + a * cnt;
+            }
+        }
+    });
+        
     return p2;
 }
 
@@ -75,6 +89,6 @@ mod tests {
         let (p1, p2) = (part1(input), part2(input));
         dbg!(p1, p2);
         assert_eq!(1110981, p1);
-        assert_eq!(1180, p2);
+        assert_eq!(24869388, p2);
     }
 }
