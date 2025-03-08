@@ -27,14 +27,27 @@ fn parse(input: &str) -> i32 {
 
 fn part1(input_file: &str) -> i32 {
     let res = parse(input_file);
-    
-    // println!("{:?}", res);
     return res;
 }
 
-fn part2(input_file: &str) -> i32 {    
-    let _puzzle = parse(&input_file);
-    let p2 = 0;
+fn part2(input_file: &str) -> i32 {
+    let mut valid_str_vec: Vec<&str> = vec![];
+
+    let split_on_dont_vec: Vec<&str> = input_file.split("don't()").collect();
+    let mut dont_iter = split_on_dont_vec.iter(); 
+    valid_str_vec.push(dont_iter.next().unwrap());
+
+    while let Some(val) = dont_iter.next() {
+        let new_val: Vec<&str> = val.split("do()").skip(1).collect();
+        for v in new_val {
+            valid_str_vec.push(v);
+        }
+    }
+
+    let mut p2 = 0;
+    for segment in valid_str_vec {
+        p2 += parse(segment);
+    }
     return p2;
 }
 
@@ -51,7 +64,7 @@ mod tests {
 
     #[test]
     fn test_sample_p2() {
-        let input = include_str!("sample.txt");
+        let input = include_str!("sample2.txt");
         let p2 = part2(input);
         dbg!(p2);
         assert_eq!(48, p2);
@@ -63,6 +76,6 @@ mod tests {
         let (p1, p2) = (part1(input), part2(input));
         dbg!(p1, p2);
         assert_eq!(183788984, p1);
-        assert_eq!(0, p2);
+        assert_eq!(62098619, p2);
     }
 }
