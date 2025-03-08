@@ -25,34 +25,55 @@ fn part1(input_file: &str) -> i32 {
     let reports = parse(&input_file);
     
     let mut safe_report_count = 0;
-    // A report only counts as safe if both of the following are true:
-    // The levels are either all increasing or all decreasing.
-    // Any two adjacent levels differ by at least one and at most three
     for report in reports {
-        let res = report.iter()
-                    .zip(report.iter().skip(1))
-                    //.inspect(|(a, b)| println!("a: {}, b: {}, diff: {}", a, b, *b-*a))
-                    .map(|(&a, &b)| b-a)
-                    .collect::<Vec<_>>();
-        let all_inc = res.iter().all(|&item| item > 0);
-        let all_dec = res.iter().all(|&item| item < 0);
-        
-        let res: Vec<i32> = res.iter().map(|&a| a.abs()).collect();
-        let all_lt3 = res.iter().all(|&item| item > 0 && item <= 3);
-        
-        if (all_inc || all_dec) && all_lt3 {
+        if is_report_safe(&report) {
             safe_report_count += 1
         }
     }
     
-    // println!("{:?}", safe_report_count);
     return safe_report_count;
 }
 
-fn part2(input_file: &str) -> i32 {    
-    let _puzzle = parse(&input_file);
-    let p2 = 0;
-    return p2;
+fn is_report_safe(report: &Vec<i32>) -> bool {
+    // A report only counts as safe if both of the following are true:
+    // The levels are either all increasing or all decreasing.
+    // Any two adjacent levels differ by at least one and at most three
+    let res = report.iter()
+                    .zip(report.iter().skip(1))
+                    //.inspect(|(a, b)| println!("a: {}, b: {}, diff: {}", a, b, *b-*a))
+                    .map(|(&a, &b)| b-a)
+                    .collect::<Vec<_>>();
+    let all_inc = res.iter().all(|&item| item > 0);
+    let all_dec = res.iter().all(|&item| item < 0);
+    
+    let res: Vec<i32> = res.iter().map(|&a| a.abs()).collect();
+    let all_lt3 = res.iter().all(|&item| item > 0 && item <= 3);
+    
+    return (all_inc || all_dec) && all_lt3;
+}
+
+fn part2(input_file: &str) -> i32 {
+    let reports = parse(&input_file);
+    
+    let mut safe_report_count = 0;
+    for report in reports {
+        if is_report_safe(&report) {
+            safe_report_count += 1;
+            continue;
+        }
+
+        // Check if removing one item fixes the report
+        for i in 0..report.len() {
+            let mut partial: Vec<i32> = report.clone();
+            partial.remove(i);
+            if is_report_safe(&partial) {
+                safe_report_count += 1;
+                break;
+            }
+        }
+    }
+    
+    return safe_report_count;
 }
 
 #[cfg(test)]
@@ -80,6 +101,6 @@ mod tests {
         let (p1, p2) = (part1(input), part2(input));
         dbg!(p1, p2);
         assert_eq!(306, p1);
-        assert_eq!(0, p2);
+        assert_eq!(366, p2);
     }
 }
