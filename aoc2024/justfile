@@ -27,4 +27,4 @@ create day:
 #
 # get the input for a day's puzzle
 get-input day:
-    ./scripts/get-aoc-input.rs --day {{day}} --current-working-directory {{justfile_directory()}}
+    cargo +nightly -Zscript .\\scripts\\get-aoc-input.rs --day {{day}} --current-working-directory {{justfile_directory()}}

@@ -6,6 +6,7 @@ edition = "2021"
 clap = { version = "4.2", features = ["derive"] }
 nom = "7.1.3"
 reqwest = { version = "0.11.22", features=["blocking"] }
+dotenv = "0.15.0"
 ---
 
 use clap::{error::ErrorKind, CommandFactory, Parser};
@@ -17,6 +18,7 @@ use reqwest::{blocking::Client, header::COOKIE};
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
+use std::path::Path;
 
 #[derive(Parser, Debug)]
 #[clap(version)]
@@ -38,6 +40,9 @@ fn parse_day(input: &str) -> IResult<&str, u32> {
 }
 
 fn main() -> Result<(), reqwest::Error> {
+     // Load .env file
+     dotenv::dotenv().ok();
+
     let session = std::env::var("SESSION")
         .expect("should have a session token set");
     let args = Args::parse();
@@ -65,19 +70,19 @@ fn main() -> Result<(), reqwest::Error> {
         .send()?
         .text()?;
 
-    for filename in ["input1.txt", "input2.txt"] {
-        let file_path = args
-            .current_working_directory
-            .join(&args.day)
-            .join(filename);
-        let mut file = File::create(&file_path)
-            .expect("should be able to create a file");
+    let subfolder = args
+        .current_working_directory
+        .join(Path::new("src"))
+        .join(&args.day);
+    
+    let file_path = subfolder.join("input.txt");
+    let mut file = File::create(&file_path).expect("should be able to create a file");
+    file.write_all(input_data.as_bytes()).expect("should be able to write to input file");
+    println!("wrote {}", file_path.display());
 
-        file.write_all(input_data.as_bytes()).expect(
-            "should be able to write to input file",
-        );
-        println!("wrote {}", file_path.display());
-    }
-
+    let file_path = subfolder.join("sample.txt");
+    let mut file = File::create(&file_path).expect("should be able to create a file");
+    println!("wrote {}", file_path.display());
+    
     Ok(())
 }
