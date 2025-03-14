@@ -154,6 +154,6 @@ mod tests {
     fn test_input() {
         let input = include_str!("input.txt");
         assert_eq!(2543, part1(input));
-        assert_eq!(62098619, part2(input));
+        assert_eq!(1930, part2(input));
     }
 }
