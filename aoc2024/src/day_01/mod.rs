@@ -1,10 +1,11 @@
-use std::fs;
 use std::collections::HashMap;
 
 pub fn run() {
-    let input_file: String = fs::read_to_string("src\\day_01\\input.txt").expect("File not found!");
-
-    println!("\n--Day 01------");
+    let day_idx = file!().find("day_").expect("Couldn't find `day_` in file path") + 4;
+    let day = file!().get(day_idx..day_idx+2).unwrap();
+    let input_file = include_str!("input.txt");
+    
+    println!("\n--Day {day}------");
     println!("Part 1: {}", &part1(&input_file));
     println!("Part 2: {}", &part2(&input_file));
     println!("--------------");
@@ -13,7 +14,6 @@ pub fn run() {
 fn parse(input: &str) -> Puzzle {
     let mut list_a: Vec<i32> = Vec::new();
     let mut list_b: Vec<i32> = Vec::new();
-    
     
     for line in input.lines() {
         let temp = line.split_whitespace().collect::<Vec<&str>>();

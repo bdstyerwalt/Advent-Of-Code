@@ -1,10 +1,11 @@
-use std::fs;
 use std::collections::HashMap;
 
 pub fn run() {
-    let input_file: String = fs::read_to_string("src\\day_04\\input.txt").expect("File not found!");
-
-    println!("\n--Day 04------");
+    let day_idx = file!().find("day_").expect("Couldn't find `day_` in file path") + 4;
+    let day = file!().get(day_idx..day_idx+2).unwrap();
+    let input_file = include_str!("input.txt");
+    
+    println!("\n--Day {day}------");
     println!("Part 1: {}", &part1(&input_file));
     println!("Part 2: {}", &part2(&input_file));
     println!("--------------");
@@ -141,26 +142,18 @@ mod tests {
     use super::*;
     #[test]
     fn test_sample_p1() {
-        let input = include_str!("sample.txt");
-        let p1 = part1(input);
-        dbg!(p1);
-        assert_eq!(18, p1);
+        assert_eq!(18, part1(include_str!("sample.txt")));
     }
 
     #[test]
     fn test_sample_p2() {
-        let input = include_str!("sample.txt");
-        let p1 = part2(input);
-        dbg!(p1);
-        assert_eq!(9, p1);
+        assert_eq!(9, part2(include_str!("sample.txt")));
     }
 
     #[test]
     fn test_input() {
         let input = include_str!("input.txt");
-        let (p1, p2) = (part1(input), part2(input));
-        dbg!(p1, p2);
-        assert_eq!(2543, p1);
-        assert_eq!(62098619, p2);
+        assert_eq!(2543, part1(input));
+        assert_eq!(62098619, part2(input));
     }
 }
