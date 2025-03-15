@@ -81,7 +81,7 @@ fn main() -> Result<(), reqwest::Error> {
     println!("wrote {}", file_path.display());
 
     let file_path = subfolder.join("sample.txt");
-    let mut file = File::create(&file_path).expect("should be able to create a file");
+    File::create(&file_path).expect("should be able to create a file");
     println!("wrote {}", file_path.display());
     
     Ok(())
