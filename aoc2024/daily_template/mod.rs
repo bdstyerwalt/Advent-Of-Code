@@ -14,17 +14,21 @@ struct Puzzle {
 
 }
 
-fn parse(input: &str, first_letter: char) -> Puzzle {
-    
+fn parse(input: &str) -> Puzzle {
+
+    //println!("{:?}", puzzle);
+    return Puzzle { };
 }
 
 fn part1(input_file: &str) -> usize {
-    
+    let puzzle = parse(input_file);
+
     return 0;
 }
 
 fn part2(input_file: &str) -> usize {
-    
+    let _puzzle = parse(input_file);
+
     return 0;
 }
 
@@ -34,18 +38,18 @@ mod tests {
     use super::*;
     #[test]
     fn test_sample_p1() {
-        assert_eq!(18, part1(include_str!("sample.txt")));
+        assert_eq!(0000, part1(include_str!("sample.txt")));
     }
 
     #[test]
     fn test_sample_p2() {
-        assert_eq!(9, part2(include_str!("sample.txt")));
+        assert_eq!(0000, part2(include_str!("sample.txt")));
     }
 
     #[test]
     fn test_input() {
         let input = include_str!("input.txt");
-        assert_eq!(2543, part1(input));
-        assert_eq!(62098619, part2(input));
+        assert_eq!(0000, part1(input));
+        assert_eq!(0000, part2(input));
     }
 }
