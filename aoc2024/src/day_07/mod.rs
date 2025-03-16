@@ -1,4 +1,4 @@
-use std::{collections::{HashMap, VecDeque}, u64};
+use std::{collections::{HashMap, VecDeque}, string, u64};
 
 use itertools::Itertools;
 
@@ -19,57 +19,65 @@ struct Puzzle {
 }
 
 impl Puzzle {
-    fn calibrate_equations(&self, operators: &Vec<String>) -> u64 {
+    fn calibrate_equations(&self, operators: &Vec<Operators>) -> u64 {
         let mut calibration_res = 0;
         for (total, nums) in &self.equations {
             let total = *total;
-            // println!("\nSearching for {total} ->");
+            println!("\nSearching for {total} -> {:?}", nums);
             
             let mut deq: VecDeque<(u64, Vec<u64>, Vec<String>)> = VecDeque::new();
             deq.push_front((nums[0].clone(), nums[1..].to_vec().clone(), vec![]));
-            // println!("{:?}", deq);
             
+            let mut eval = true;
             while let Some((acc, num_vec, mut op_vec)) = deq.pop_front() {
-                // println!("{acc} __ {:?} __ {:?} ___ DEQ Size: {}", num_vec, op_vec, deq.len());
-    
-                if let None = num_vec.get(0) {
-                    // println!("RAN OUT OF NUMBERS...\n");
+                if num_vec.get(0).is_none() || !eval {
                     break;
                 }
+                println!("{acc} __ {:?} __ {:?} ___ DEQ Size: {}", num_vec, op_vec, deq.len());
     
                 let n = num_vec.get(0).unwrap();
                 let rem_num = num_vec[1..].to_vec();
-                // println!("REM: {:?}", rem_num);
-    
-                let mul = acc * n;
-                if mul == total  && rem_num.len() == 0 {
-                    op_vec.push("*".to_string());
-                    println!("{}", create_equation_string(total, nums.clone(), &op_vec));
-                    calibration_res += mul;
-                    break;
-                } else if mul < total {
-                    // clone so we don't affect the op string for the add branch 
-                    let mut mul_op_vec = op_vec.clone(); 
-                    mul_op_vec.push("*".to_string());
-                    deq.push_back((mul, rem_num.clone(), mul_op_vec));
-                }
-    
-                let add = acc + n;
-                if add == total && rem_num.len() == 0 {
-                    op_vec.push("+".to_string());
-                    println!("{}", create_equation_string(total, nums.clone(), &op_vec));
-                    calibration_res += add;
-                    break;
-                } else if add < total {
-                    op_vec.push("+".to_string());
-                    deq.push_back((add, rem_num, op_vec));
+                let is_last_val = rem_num.len() == 0;
+                for op in operators {
+                    let (status, val) = Puzzle::test_operator(&total, acc, n.clone(), op, is_last_val);
+                    match status {
+                        Status::MATCH => {
+                            op_vec.push(op.get_string()); 
+                            println!("MATCH: {}\n", create_equation_string(total, nums.clone(), &op_vec));
+                            calibration_res += val;
+                            eval = false;
+                            break;
+                        },
+                        Status::EVALUATING => {
+                            let mut temp_op_vec = op_vec.clone();
+                            temp_op_vec.push(op.get_string());
+                            deq.push_back((val, rem_num.clone(), temp_op_vec))
+                        },
+                        Status::OVERFLOW => {},
+                    }
                 }
             }
         }
         return calibration_res;
     }
+
+    fn test_operator(total: &u64, acc: u64, n: u64, op: &Operators, is_last_val: bool) -> (Status, u64) {
+        let val = op.eval(acc, n);
+        if val == *total && is_last_val {
+            return (Status::MATCH, val);
+        } else if val < *total {
+            return (Status::EVALUATING, val);
+        } else {
+            return (Status::OVERFLOW, 0);
+        }
+    }
 }
 
+enum Status {
+    MATCH,
+    EVALUATING,
+    OVERFLOW,
+}
 enum Operators {
     ADD,
     MULT,
@@ -116,7 +124,8 @@ fn parse(input: &str) -> Puzzle {
 
 fn part1(input_file: &str) -> u64 {
     let puzzle = parse(input_file);
-    let calibration_res = puzzle.calibrate_equations(&vec![]);
+    let ops = vec![Operators::ADD, Operators::MULT];
+    let calibration_res = puzzle.calibrate_equations(&ops);
 
     return calibration_res;
 }
