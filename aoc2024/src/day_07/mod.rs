@@ -1,4 +1,6 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
+
+use itertools::Itertools;
 
 pub fn run() {
     let day_idx = file!().find("day_").expect("Couldn't find `day_` in file path") + 4;
@@ -34,19 +36,55 @@ fn parse(input: &str) -> Puzzle {
 
 fn part1(input_file: &str) -> u64 {
     let puzzle = parse(input_file);
-    println!("{:?}", puzzle.equations);
     let mut calibration_res = 0;
-    for (total, mut nums) in puzzle.equations {
-        let acc = nums[0];
-        print!("\nSearching for {total} -> {acc}");
-        nums = nums[1..].to_vec();
-        if total == evaluate_mult(total, acc.clone(), nums.clone()) {
-            print!(" -> SUCCESS");
-            calibration_res += total;
-        } else if total == evaluate_add(total, acc, nums) {
-            print!(" -> SUCCESS");
-            calibration_res += total;
+
+    for (total, nums) in puzzle.equations {
+        // println!("\nSearching for {total} ->");
+        
+        let mut deq: VecDeque<(u64, Vec<u64>, Vec<String>)> = VecDeque::new();
+        deq.push_front((nums[0].clone(), nums[1..].to_vec().clone(), vec![]));
+        // println!("{:?}", deq);
+        
+        while let Some((acc, num_vec, mut op_vec)) = deq.pop_front() {
+            // println!("{acc} __ {:?} __ {:?} ___ DEQ Size: {}", num_vec, op_vec, deq.len());
+
+            if let None = num_vec.get(0) {
+                // println!("RAN OUT OF NUMBERS...\n");
+                break;
+            }
+
+            let n = num_vec.get(0).unwrap();
+            let rem_num = num_vec[1..].to_vec();
+            // println!("REM: {:?}", rem_num);
+
+            let mul = acc * n;
+            if mul == total  && rem_num.len() == 0 {
+                op_vec.push("*".to_string());
+                println!("{}", create_equation_string(total, nums.clone(), &op_vec));
+                calibration_res += mul;
+                break;
+            } else if mul < total {
+                // clone so we don't affect the op string for the add branch 
+                let mut mul_op_vec = op_vec.clone(); 
+                mul_op_vec.push("*".to_string());
+                deq.push_back((mul, rem_num.clone(), mul_op_vec));
+            }
+
+            let add = acc + n;
+            if add == total && rem_num.len() == 0 {
+                op_vec.push("+".to_string());
+                println!("{}", create_equation_string(total, nums.clone(), &op_vec));
+                calibration_res += add;
+                break;
+            } else if add < total {
+                op_vec.push("+".to_string());
+                deq.push_back((add, rem_num, op_vec));
+            }
         }
+
+
+
+
     }
     return calibration_res;
 }
@@ -57,40 +95,15 @@ fn part2(input_file: &str) -> usize {
     return 0;
 }
 
-fn evaluate_mult(total: u64, acc: u64, nums: Vec<u64>) -> u64 {
-    let res = acc * nums[0];
-    if res == total {
-        if nums.len() > 1 {
-            return evaluate_add(total, acc, nums);
-        }
-
-        print!(" * {}", nums[0]);
-        print!(" = {res}");
-        return res;
-    } else if res > total {
-        return evaluate_add(total, acc, nums);
-    } else if nums.len() > 1 {
-        print!(" * {}", nums[0]);
-        return evaluate_mult(total, res, nums[1..].to_vec());
+fn create_equation_string(total: u64, nums: Vec<u64>, operators: &Vec<String>) -> String {
+    let mut res = total.to_string() + " = " ;
+    let num_strings: Vec<String> = nums.iter().map(|n| n.to_string()).collect();
+    let space = " ".to_string();
+    let it = num_strings.iter().interleave(operators).intersperse(&space);
+    for c in it {
+        res.push_str(c);
     }
-    return 0;
-}
-
-fn evaluate_add(total: u64, acc: u64, nums: Vec<u64>) -> u64 {
-    print!(" + {}", nums[0]);
-    let res = acc + nums[0];
-    if res == total {
-        if nums.len() > 1 {
-            return 0;
-        }
-
-        print!(" = {res}");
-        return res;
-    } else if res < total && nums.len() > 1 {
-        return evaluate_mult(total, res, nums[1..].to_vec());
-    }
-    // greater than total
-    return 0;
+    return res;
 }
 
 #[cfg(test)]
@@ -98,8 +111,8 @@ mod tests {
     use super::*;
     #[test]
     fn test_sample_p1() {
-        // assert_eq!(3749, part1(include_str!("sample.txt")));
-        assert_eq!(37741, part1(include_str!("sample2.txt")));
+        assert_eq!(3749, part1(include_str!("sample.txt")));
+        assert_eq!(3774, part1(include_str!("sample2.txt")));
     }
 
     #[test]
@@ -109,9 +122,7 @@ mod tests {
 
     #[test]
     fn test_input() {
-        // assert_eq!(9999, part1(include_str!("input.txt")));
-        assert!(21498048347537 < part1(include_str!("input.txt")));
-        
+        assert_eq!(21572148763543, part1(include_str!("input.txt")));
         assert_eq!(0, part2(include_str!("input.txt")));
     }
 }
