@@ -1,7 +1,5 @@
 use std::collections::{HashMap, HashSet};
-use std::cmp::Ordering;
 use std::usize;
-use itertools::Itertools;
 
 pub fn run() {
     let day_idx = file!().find("day_").expect("Couldn't find `day_` in file path") + 4;
@@ -18,39 +16,6 @@ pub fn run() {
 struct Point {
     x: isize,
     y: isize,
-}
-
-impl PartialOrd for Point {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for Point {
-    fn cmp(&self, other: &Self) -> Ordering {
-        (self.y, self.x).cmp(&(other.y, other.x))
-    }
-}
-
-impl Point {
-    fn new(x: isize, y: isize) -> Self {
-        Point { x: x, y: y }
-    }
-
-    fn same_x(p1: &Point, p2: &Point) -> bool {
-        return p1.x == p2.x;
-    }
-
-    fn same_y(p1: &Point, p2: &Point) -> bool {
-        return p1.y == p2.y;
-    }
-
-    fn complete_the_square(p1: &Point, p2: &Point, p3: &Point) -> Option<Self> {
-        if Point::same_x(p1, p2) && Point::same_y(p1, p3) {
-            return Some(Point { x: p3.x, y: p2.y });
-        }
-        return None;
-    }
 }
 
 #[derive(Debug, Hash, Eq, PartialEq, Clone, Copy)]
@@ -105,7 +70,7 @@ impl Puzzle {
         }
     }
 
-    fn print_map_dbg_idx(&self) {
+    fn print_map_dbg_idx(&self, map: HashMap<Point, String>) {
         print!("\n  ");
         for c in 0..self.width {
             print!("{c}");
@@ -115,7 +80,7 @@ impl Puzzle {
         for r in 0..self.height {
             print!("{} ", r);
             for c in 0..self.width {
-                print!("{}", self.final_map.get(&Point{x:c, y:r}).unwrap());
+                print!("{}", map.get(&Point{x:c, y:r}).unwrap());
             }
             println!();
         }
@@ -139,22 +104,6 @@ impl Puzzle {
         }
     }
     
-    fn count_x_per_row(&self) {
-        let mut tot_cnt = 0;
-        for r in 0..self.height {
-            let mut cnt = 0;
-            for c in 0..self.width {
-                if self.final_map.get(&Point{x:c, y:r}).unwrap() == &String::from("X") {
-                    cnt += 1;
-                }
-            }
-            println!("Row {r}: {cnt} X's");
-            tot_cnt += cnt;
-        }
-
-        println!("@@@ {tot_cnt}");
-    }
-
     fn is_point_in_bounds(&self, pt: &Point) -> bool {
         return pt.x >= 0 && pt.x < self.width && pt.y >= 0 && pt.y < self.height;
     }
@@ -188,38 +137,13 @@ impl Puzzle {
 
     fn draw_corners(&mut self) {
         for c in &self.corners {
-            self.final_map.entry(*c).and_modify(|v| *v="+".to_string());
+            if *c != self.start_pt {
+                self.final_map.entry(*c).and_modify(|v| *v="+".to_string());
+            }
         }
+        self.final_map.entry(self.start_pt).and_modify(|v| *v="^".to_string());
     }
 
-    fn print_obs_dbg(&self, corners: Vec<Point>, obstacle: Point) {
-        let mut obs_map = self.final_map.clone();
-        let xs: Vec<isize> = corners.iter().map(|p| p.x).collect();
-        let ys: Vec<isize> = corners.iter().map(|p| p.y).collect();
-
-        let min_x = *xs.iter().min().unwrap();
-        let max_x = *xs.iter().max().unwrap();
-        
-        let min_y = *ys.iter().min().unwrap();
-        let max_y = *ys.iter().max().unwrap();
-
-        for x in min_x+1..max_x {
-            obs_map.entry(Point::new(x, min_y)).and_modify(|v| *v="-".to_string());
-            obs_map.entry(Point::new(x, max_y)).and_modify(|v| *v="-".to_string());
-        }
-
-        for y in min_y+1..max_y {
-            obs_map.entry(Point::new(min_x, y)).and_modify(|v| *v="|".to_string());
-            obs_map.entry(Point::new(max_x, y)).and_modify(|v| *v="|".to_string());
-        }
-
-        for c in corners.iter().chain(vec![&obstacle]) {
-            obs_map.entry(*c).and_modify(|v| *v="+".to_string());
-        }
-
-        obs_map.entry(obstacle).and_modify(|v| *v="O".to_string());
-        self.print_custom_map(&obs_map);
-    }
 }
 
 fn parse(input: &str) -> Puzzle {
@@ -274,112 +198,29 @@ fn part1(input_file: &str) -> usize {
 fn part2(input_file: &str) -> usize {
     let mut puzzle = parse(input_file);
     puzzle.run_guard_patrol();
-    puzzle.print_map();
 
-    // for v in &puzzle.corners {
-        // println!("{:?}", v);
-    // }
+    puzzle.visited.remove(&puzzle.start_pt);
+    for obs in &puzzle.visited {
+        let mut cycle_path: HashSet<(Point, Direction)> = HashSet::new();
 
-    for (p, d) in &puzzle.path {
-        let new_d = turn(*d);
-        let mut potential = walk(&p, &new_d);
-        // println!("\npot: {:?}", potential);
-
-        while puzzle.is_point_in_bounds(&potential) {
-            print!("Walking {:?}: ", new_d);
-            println!("{:?}", potential);
-
-            if puzzle.path.contains(&(potential, new_d)){
-                let obs = walk(&p, &d);
-                
-                if puzzle.walls.contains(&obs) {
-                    println!();
-                    break;
-                }
-                
-                println!("obs: {:?}\n", obs);
-                // let mut map = puzzle.final_map.clone();
-                // map.entry(*p).and_modify(|v| *v="+".to_string());
-                // map.entry(obs).and_modify(|v| *v="O".to_string());
-                puzzle.final_map.entry(obs).and_modify(|v| *v="O".to_string());
-                // puzzle.print_custom_map(&map);
-                puzzle.obstructions.insert(obs);
+        let mut guard_pos = puzzle.start_pt;
+        let mut guard_dir = puzzle.start_dir;
+        loop {
+            let next_pt = walk(&guard_pos, &guard_dir);
+            if puzzle.walls.contains(&next_pt) || next_pt == *obs {
+                guard_dir = turn(guard_dir);
+            } else if cycle_path.contains(&(next_pt, guard_dir)) {
+                puzzle.obstructions.insert(*obs);
+                break;
+            } else if puzzle.is_point_in_bounds(&guard_pos) {
+                guard_pos = next_pt;
+                cycle_path.insert((guard_pos, guard_dir));
+            } else {
                 break;
             }
-        
-            // println!("Walking {:?}", new_d);
-            potential = walk(&potential, &new_d);
-            // println!("pot: {:?}", potential);
         }
     }
-    puzzle.print_map_dbg_idx();
-
     return puzzle.obstructions.len();
-}
-
-#[allow(dead_code)]
-fn junk(input_file: &str) -> usize {
-    let mut puzzle = parse(input_file);
-    puzzle.run_guard_patrol();
-    puzzle.draw_corners();
-
-
-    // Add the starting location since it is invalid
-    puzzle.walls.insert(puzzle.start_pt);
-
-    let mut obstructions: HashSet<Point> = HashSet::new();
-    let cv: Vec<Point> = puzzle.corners.clone().into_iter().collect();
-    for mut combo in cv.iter().combinations(3) {
-        combo.sort();
-        for p in combo.iter().permutations(3) {
-            let (p1, p2, p3) = (p[0], p[1], p[2]);
-            
-            if let Some(pt) = Point::complete_the_square(p1, p2, p3) {
-                let corner_pts = vec![**p1, **p2, **p3];
-                let obs = find_corner_location(corner_pts.clone(), pt);
-                if puzzle.walls.contains(&obs) {//&& puzzle.visited.contains(&pt) {
-                    continue;
-                }
-                println!("\n@@@({},{})", obs.x, obs.y);
-                
-                // puzzle.print_obs_dbg(corner_pts, pt);
-                
-                puzzle.final_map.entry(obs).and_modify(|v| *v="O".to_string());
-                obstructions.insert(obs);
-                break;
-            }
-        }
-    }
-
-    puzzle.print_map();
-
-    return obstructions.len();
-}
-
-fn find_corner_location(corner_points: Vec<Point>, pt: Point) -> Point {
-    let xs: Vec<isize> = corner_points.iter().map(|p| p.x).collect();
-    let ys: Vec<isize> = corner_points.iter().map(|p| p.y).collect();
-
-    let min_x = *xs.iter().min().unwrap();
-    let max_x = *xs.iter().max().unwrap();
-    
-    let min_y = *ys.iter().min().unwrap();
-    let max_y = *ys.iter().max().unwrap();
-
-    if pt.x == min_x && pt.y == min_y {
-        // top left
-        return Point::new(pt.x, pt.y-1);
-    } else if pt.x == max_x && pt.y == max_y {
-        // bottom right
-        return Point::new(pt.x, pt.y+1);
-    } else if pt.x == min_x && pt.y == max_y {
-        // bottom left
-        return Point::new(pt.x-1, pt.y);
-    } else {
-        // top right
-        return Point::new(pt.x+1, pt.y);
-    }
-
 }
 
 #[cfg(test)]
@@ -401,6 +242,6 @@ mod tests {
     fn test_input() {
         let input = include_str!("input.txt");
         assert_eq!(5331, part1(input));
-        // assert_eq!(0, part2(input));
+        assert_eq!(1812, part2(input));
     }
 }
